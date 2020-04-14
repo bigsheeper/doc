@@ -20,6 +20,12 @@ or
 `git reset --hard $COMMIT_ID`
 ######delete remote branch
 `git push origin --delete $BRANCH_NAME`
+######first pull all submodules
+`git submodule update --init --recursive`
+######to update submodules
+`git submodule update --recursive --remote`
+or simply
+`git pull --recurse-submodules`
 
 ##Others
 ######use objdump to check function sign
