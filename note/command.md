@@ -26,6 +26,8 @@ or
 `git submodule update --recursive --remote`
 or simply
 `git pull --recurse-submodules`
+######remove modify, reset to HEAD
+`git reset --hard HEAD`
 
 ##Others
 ######use objdump to check function sign
