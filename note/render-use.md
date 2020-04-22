@@ -1,6 +1,6 @@
-# vega 接口:
+# vega 接口
 
-## vega_pointmap:
+## vega_pointmap
 ```python
 def vega_pointmap(width,
                   height,
@@ -156,9 +156,9 @@ vega_2 = arctern.util.vega.vega_choroplethmap(1900, 1410, bounding_box=[-8237467
 
 
 
-# pandas interface:
+# pandas 接口
 
-## pointmap：
+## pointmap
 ```python
 def point_map(vega, points)
 ```
@@ -242,7 +242,7 @@ vega = arctern.util.vega.vega_heatmap(1024, 896, bounding_box=[-73.998427, 40.73
 res = arctern.heat_map(vega, points, arr_c)
 ```
 
-## choroplemap：
+## choroplemap
 ```python
 def choropleth_map(vega, region_boundaries, weights)
 ```
@@ -268,9 +268,9 @@ res = arctern.choropleth_map(vega, geos, weights)
 
 
 
-# pyspark interface:
+# pyspark 接口
 
-## pointmap：
+## pointmap
 ```python
 def pointmap(vega, df)
 ```
