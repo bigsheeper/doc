@@ -157,7 +157,7 @@ vega = arctern.util.vega.vega_choroplethmap(1900, 1410, bounding_box=[-73.994092
 ```python
 def point_map(vega, points)
 ```
-- 函数功能: 绘制点图
+- 函数功能: 绘制点图。
 
 - 参数: 
 ```
