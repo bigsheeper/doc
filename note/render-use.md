@@ -10,20 +10,20 @@ def vega_pointmap(width,
                   opacity,
                   coordinate_system)
 ```
-- 函数功能: 设置输入数据的地理坐标范围、所属地理坐标系统，设置目标图片的宽和高，设置点图中点的直径、颜色、不透明度
+- 函数功能: 根据给定的配置参数，构建描述渲染样式的 VegaPointMap 对象。
 
 - 参数: 
 ```
-width(int): 图片宽度，单位是像素
-height(int): 图片高度，单位是像素
-bounding_box(list): 渲染图片要展示的地理坐标范围，以 [x_min, y_min, x_max, y_max] 的形式表示一个矩形区域，图片左下角的像素坐标 (0, 0) 表示实际地理坐标 (x_min, y_min) ，图片右上角的像素坐标 (width, height) 表示实际地理坐标 (x_max, y_max)
-point_size(int): 可选参数，表示点的直径，默认值为 3
-point_color(str): 可选参数，表示点的颜色，使用十六进制的颜色值表示，默认值为"#115f9a"
-opacity(float): 可选参数，表示点的不透明度，默认值为 1.0
-coordinate_system(str): 可选参数，表示输入数据所属的地理坐标系统，默认值为"EPSG:3857"，可选的地理坐标系统请参照 <https://spatialreference.org/ref/epsg/>
+width(int): 图片宽度，单位为像素个数;
+height(int): 图片高度，单位为像素个数;
+bounding_box(list): 图片对应的地理坐标区域，以 [x_min, y_min, x_max, y_max] 的形式表示一个矩形区域。图片左下角的像素坐标 (0, 0) 对应实际地理坐标 (x_min, y_min) ，图片右上角的像素坐标 (width, height) 对应实际地理坐标 (x_max, y_max);
+point_size(int): 可选参数，表示点的直径，默认值为 3;
+point_color(str): 可选参数，表示点的颜色，使用十六进制的颜色(hex color)表示，默认值为"#115f9a";
+opacity(float): 可选参数，表示点的不透明度，范围为 0.0 ~ 1.0，默认值为 1.0;
+coordinate_system(str): 可选参数，表示输入数据所属的地理坐标系统，默认值为"EPSG:3857"，当前支持的地理坐标系统请参照 <https://spatialreference.org/>
 ```
 
-- 返回值: 用于描述渲染样式的 VegaPointMap 对象
+- 返回值: 用于描述渲染样式的 VegaPointMap 对象。
 - 返回值类型: `arctern.util.vega.pointmap.vega_pointmap.VegaPointMap`
 
 - 示例: 
@@ -47,21 +47,21 @@ def vega_weighted_pointmap(width,
                            opacity,
                            coordinate_system)
 ```
-- 函数功能: 设置输入数据的地理坐标范围、所属地理坐标系统，设置目标图片的宽和高，设置点图中点的直径范围、颜色范围、透明度
+- 函数功能: 根据给定的配置参数，构建描述渲染样式的 VegaWeightedPointMap 对象。
 
 - 参数: 
 ```
-width(int): 图片宽度，单位是像素
-height(int): 图片高度，单位是像素
-bounding_box(list): 渲染图片要展示的地理坐标范围，以 [x_min, y_min, x_max, y_max] 的形式表示一个矩形区域，图片左下角的像素坐标 (0, 0) 表示实际地理坐标 (x_min, y_min) ，图片右上角的像素坐标 (width, height) 表示实际地理坐标 (x_max, y_max)
-color_gradient(list): 点的颜色渐变范围，表示形式为 ["0000FF"] 或 ["#0000FF", "FF0000"]，["0000FF"] 表示所有的点颜色相同，["#0000FF", "FF0000"] 表示点的颜色可变，点的颜色由输入的一列权重数据值决定
-color_bound(list): 可选参数，用于控制颜色的权重值范围，表示形式为 [1, 10]，只有当color_gradient中包含两个颜色值时需要设置，权重值等于 1 时点的颜色为"#0000FF"， 权重值等于 10 时点的颜色为"#FF0000"
-size_bound(list): 可选参数，用于控制点直径的权重值范围，表示形式为 [10] 或 [1, 10]，默认值为[3]，[10] 表示所有点的直径都为10，[1, 10] 表示点大小可变，权重值等于 1 时，点的直径为 1 ，权重值等于 10 时，点的直径为 10
-opacity(float): 可选参数，表示点的不透明度，默认值为 1.0
+width(int): 图片宽度，单位为像素个数;
+height(int): 图片高度，单位为像素个数;
+bounding_box(list): 渲染图片要展示的地理坐标范围，以 [x_min, y_min, x_max, y_max] 的形式表示一个矩形区域，图片左下角的像素坐标 (0, 0) 表示实际地理坐标 (x_min, y_min) ，图片右上角的像素坐标 (width, height) 表示实际地理坐标 (x_max, y_max);
+color_gradient(list): 点的颜色渐变范围，表示形式为 ["hex_color"] 或 ["hex_color1", "hex_color2"]。当形式为["hex_color"] 时所有点的颜色相同。当形式为["hex_color1", "hex_color2"] 时点的颜色由输入数据中一列的值（权重）决定，且颜色在 "hex_color1" ~ "hex_color2" 之间变化;
+color_bound(list): 可选参数，用于描述权重与颜色的对应关系，仅当color_gradient中包含两个颜色值时需要设置，表示形式为 [color_min, color_max]。权重值小于等于 color_min 时点的颜色为"hex_color1"， 权重值大于等于 color_max 时点的颜色为"hex_color2";
+size_bound(list): 可选参数，用于描述点的直径范围，表示形式为 [diameter] 或 [diameter_min, diameter_max]，默认值为[3]。[diameter] 表示所有点的直径都为 diameter; [diameter_min, diameter_max] 表示点的直径由输入数据中一列的值（权重）决定，且在 diameter_min ~ diameter_max 之间变化; 权重值小于等于 diameter_min 时点的直径为 diameter_min，权重值大于等于 diameter_max 时点的直径为 diameter_max; 权重值在 diameter_min ~ diameter_max 之间时点的直径与权重值相等;
+opacity(float): 可选参数，表示点的不透明度，范围为 0.0 ~ 1.0，默认值为 1.0;
 coordinate_system(str): 可选参数，表示输入数据所属的地理坐标系统，默认值为"EPSG:3857"，可选的地理坐标系统请参照 <https://spatialreference.org/ref/epsg/>
 ```
 
-- 返回值: 用于描述渲染样式的 VegaWeightedPointMap 对象
+- 返回值: 用于描述渲染样式的 VegaWeightedPointMap 对象。
 - 返回值类型: `arctern.util.vega.pointmap.vega_weighted_pointmap.VegaWeightedPointMap`
 
 - 示例: 
@@ -94,27 +94,25 @@ def vega_heatmap(width,
                  aggregation_type)
 ```
 
-- 函数功能: 设置输入数据的地理坐标范围、所属地理坐标系统、数据聚合类型，设置目标图片的宽和高，设置决定热力图中的热度辐射范围的地图放大比例
+- 函数功能: 根据给定的配置参数，构建描述渲染样式的 VegaHeatMap 对象。
 
 - 参数: 
 ```
-width(int): 图片宽度，单位是像素
-height(int): 图片高度，单位是像素
+width(int): 图片宽度，单位为像素个数;
+height(int): 图片高度，单位为像素个数;
 bounding_box(list): 渲染图片要展示的地理坐标范围，以 [x_min, y_min, x_max, y_max] 的形式表示一个矩形区域，图片左下角的像素坐标 (0, 0) 表示实际地理坐标 (x_min, y_min) ，图片右上角的像素坐标 (width, height) 表示实际地理坐标 (x_max, y_max)
-map_zoom_level(float): 地图放大比例，取值范围为 1 ~ 15
+map_zoom_level(float): 热力的辐射范围，与mapbox的地图放大比例相对应，取值范围为 1 ~ 15
 coordinate_system(str): 可选参数，表示输入数据所属的地理坐标系统，默认值为"EPSG:3857"，可选的地理坐标系统请参照 <https://spatialreference.org/ref/epsg/>
-aggregation_type(str): 可选参数，表示数据聚合类型，默认值为"max"
+aggregation_type(str): 可选参数，表示输入数据到图片像素热力的聚合方式，默认值为"max"
 ```
 
-- 返回值: 用于描述渲染样式的 VegaHeatMap 对象
+- 返回值: 用于描述渲染样式的 VegaHeatMap 对象。
 - 返回值类型: `arctern.util.vega.heatmap.vega_heatmap.VegaHeatMap`
 
 - 示例: 
 ```python
 # 绘制宽为1024，高为896的热力图
-vega_1 = arctern.util.vega.vega_heatmap(1024, 896, bounding_box=[-73.998427, 40.730309, -73.954348, 40.780816], map_zoom_level=10.0, coordinate_system="EPSG:4326")
-
-vega_2 = arctern.util.vega.vega_heatmap(1024, 896, bounding_box=[-8237467.21, 4972643.32, -8232560.36, 4980065.63], map_zoom_level=10.0)
+vega = arctern.util.vega.vega_heatmap(1024, 896, bounding_box=[-73.998427, 40.730309, -73.954348, 40.780816], map_zoom_level=10.0, coordinate_system="EPSG:4326")
 ```
 
 ## vega_choroplethmap
@@ -128,30 +126,27 @@ def vega_choroplethmap(width,
                        coordinate_system,
                        aggregation_type)
 ```
-- 函数功能: 设置输入数据的地理坐标范围、所属地理坐标系统、数据聚合操作类型，设置目标图片的宽和高，设置轮廓图的颜色范围、透明度
+- 函数功能: 根据给定的配置参数，构建描述渲染样式的 VegaChoroplethMap 对象。
 
 - 参数:
 ```
-width(int): 图片宽度，单位是像素
-height(int): 图片高度，单位是像素
+width(int): 图片宽度，单位为像素个数;
+height(int): 图片高度，单位为像素个数;
 bounding_box(list): 渲染图片要展示的地理坐标范围，以 [x_min, y_min, x_max, y_max] 的形式表示一个矩形区域，图片左下角的像素坐标 (0, 0) 表示实际地理坐标 (x_min, y_min) ，图片右上角的像素坐标 (width, height) 表示实际地理坐标 (x_max, y_max)
 color_gradient(list): 点的颜色渐变范围，表示形式为 ["0000FF"] 或 ["#0000FF", "FF0000"]，["0000FF"] 表示所有的点颜色相同，["#0000FF", "FF0000"] 表示点的颜色可变，点的颜色由输入的一列权重数据值决定
 color_bound(list): 可选参数，用于控制颜色的权重值范围，表示形式为 [1, 10]，只有当color_gradient中包含两个颜色值时需要设置，权重值等于 1 时点的颜色为"#0000FF"， 权重值等于 10 时点的颜色为"#FF0000"
 opacity(float): 可选参数，表示点的不透明度，默认值为 1.0
 coordinate_system(str): 可选参数，表示输入数据所属的地理坐标系统，默认值为"EPSG:3857"，可选的地理坐标系统请参照 <https://spatialreference.org/ref/epsg/>
-aggregation_type(str): 可选参数，数据聚合类型，默认值为"sum"
+aggregation_type(str): 可选参数，表示输入数据到轮廓权重的聚合方式，默认值为"sum"
 ```
 
-- 返回值: 用于描述渲染样式的 VegaChoroplethMap 对象
-
+- 返回值: 用于描述渲染样式的 VegaChoroplethMap 对象。
 - 返回值类型: `arctern.util.vega.choroplethmap.vega_choroplethmap.VegaChoroplethMap`
 
 - 示例: 
 ```python
 # 绘制宽为1024，高为896，颜色值在蓝色和红色之间的轮廓图
-vega_1 = arctern.util.vega.vega_choroplethmap(1900, 1410, bounding_box=[-73.994092, 40.753893, -73.977588, 40.759642], color_gradient=["#0000FF", "#FF0000"], color_bound=[2.5, 5], opacity=0.5, coordinate_system="EPSG:4326")
-
-vega_2 = arctern.util.vega.vega_choroplethmap(1900, 1410, bounding_box=[-8237467.21, 4972643.32, -8232560.36, 4980065.63], color_gradient=["#0000FF", "#FF0000"], color_bound=[2.5, 5])
+vega = arctern.util.vega.vega_choroplethmap(1900, 1410, bounding_box=[-73.994092, 40.753893, -73.977588, 40.759642], color_gradient=["#0000FF", "#FF0000"], color_bound=[2.5, 5], opacity=0.5, coordinate_system="EPSG:4326")
 ```
 
 
@@ -167,10 +162,10 @@ def point_map(vega, points)
 - 参数: 
 ```
 vega: VegaPointMap 对象
-points: 包含点的pandas.Series，点的类型为wkb
+points: 包含点的 pandas.Series，点的类型为wkb - 含义：所需绘制的点
 ```
 
-- 返回值: base64 encoded png
+- 返回值: base64编码的png图片
 - 返回值类型: `bytes`
 
 - 示例: 
@@ -207,10 +202,10 @@ def weighted_point_map(vega, points, color_weights, size_weights)
 - 函数功能: 绘制带权重的点图，权重用于决定点的大小和颜色
 
 - 参数: 
-```python
+```
 vega: VegaWeightedPointMap 对象
-points: 包含点的 pandas.Series，点的类型为 wkb
-color_weights: 数值类型的 pandas.Series
+points: 包含点的 pandas.Series，点的类型为 wkb TODO copy lp
+color_weights: 可选参数，点的颜色权重，type copy lp
 size_weights: 数值类型的 pandas.Series
 ```
 
@@ -225,10 +220,8 @@ import arctern
 from arctern.util import save_png
 from arctern.util.vega import vega_weighted_pointmap
 
-# 读取csv文件
+# 读取 csv 文件并创建绘图数据
 df = pd.read_csv("test_data.csv", dtype={'longitude':np.float64, 'latitude':np.float64, 'color_weights':np.float64, 'size_weights':np.float64, 'region_boundaries':np.object})
-
-# 创建包含points的dataframe
 region = arctern.ST_GeomFromText(pd.Series(['POLYGON ((-73.99668712186558 40.72972339069935, -73.99668712186558 40.7345193345495, -73.99045479584949 40.7345193345495, -73.99045479584949 40.72972339069935, -73.99668712186558 40.72972339069935))']))
 d=pd.DataFrame(region).T
 region = region.append([d]*df.shape[0])
@@ -240,8 +233,7 @@ input2 = df[df.in_region == True].head(2000).reset_index()
 points1 = arctern.ST_Point(input1['longitude'], input1['latitude'])
 points2 = arctern.ST_Point(input2['longitude'], input2['latitude'])
 
-# color_gradient 的 list 中只有一个元素，表示点的颜色都为#87CEEB，此时可以不指定 color_bound
-# size_bound=[1,10] 表示 size_weights series 中最小值对应的点大小为 1 ，最大值对应的点大小为 10
+# 绘制带权点图，点的颜色为'#87CEEB'，点的大小根据 input1['color_weights'] 在 1 ~ 10 之间变化
 vega1 = vega_weighted_pointmap(1740, 1767, bounding_box=[-73.99668712186558,40.72972339069935,-73.99045479584949,40.7345193345495], color_gradient=["#37A2DA"], size_bound=[1,10], opacity=1.0, coordinate_system="EPSG:4326")
 png1 = arctern.weighted_point_map(vega1, points1, color_weights=input1['color_weights'])
 save_png(png1, "/tmp/python_weighted_pointmap1.png")  
@@ -263,7 +255,7 @@ save_png(png3, '/tmp/python_weighted_pointmap3.png')
 ```python
 def heat_map(vega, points, weights)
 ```
-- 函数功能: 绘制热力图
+- 函数功能: 绘制热力图，权重用于决定热力值。
 
 - 参数: 
 ```json
@@ -296,7 +288,7 @@ input1 = df[df.in_region == True].reset_index()
 
 points = arctern.ST_Point(input1['longitude'], input1['latitude'])
 
-# 地图放大比例为10.0，输入数据的坐标系统为EPSG:4326
+# 根据 input1['color_weights'] 绘制热力图
 vega = vega_heatmap(1824, 1777, bounding_box=[-74.01424568752932, 40.72759334104623, -73.96056823889673, 40.76721122683304], map_zoom_level=10.0, coordinate_system='EPSG:4326')
 png = arctern.heat_map(vega, points, input1['color_weights'])
 save_png(png, "/tmp/python_heatmap.png")   
@@ -306,7 +298,7 @@ save_png(png, "/tmp/python_heatmap.png")
 ```python
 def choropleth_map(vega, region_boundaries, weights)
 ```
-- 函数功能: 绘制轮廓图
+- 函数功能: 绘制轮廓图，权重用于决定轮廓的颜色。
 
 - 参数:
 ```json
@@ -341,7 +333,7 @@ save_png(png, "/tmp/python_choroplethmap.png")
 
 
 
-# pyspark 接口
+# spark 接口
 
 ## pointmap
 ```python
@@ -376,7 +368,6 @@ def draw_point_map(spark):
 
     register_funcs(spark)
 
-    # 和 spark 的画图结合同样和 vega 接口配合使用，等同于python画图的使用方式
     # df 是只有一列数据的 pyspark dataframe, 该列数据的表示点坐标，类型为 wkb 格式的 point
     df = spark.sql("SELECT ST_Point (longitude, latitude) AS point FROM test_table WHERE (ST_Within (ST_Point (longitude, latitude), ST_GeomFromText('POLYGON ((-74.01398981737215 40.71353244267465, -74.01398981737215 40.74480271529791, -73.96979949831308 40.74480271529791, -73.96979949831308 40.71353244267465, -74.01398981737215 40.71353244267465))'))) LIMIT 10000")
     vega = vega_pointmap(1903, 1777, bounding_box=[-74.01398981737215,40.71353244267465,-73.96979949831308,40.74480271529791], point_size=10, point_color="#37A2DA", opacity=1.0, coordinate_system="EPSG:4326")
