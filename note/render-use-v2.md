@@ -68,6 +68,7 @@
 
 &#x2002; &#x2003; &#x2002; &#x2003; * coordinate_system(str) -- 可选参数，表示输入数据所属的地理坐标系统，默认值为"EPSG:3857"，当前支持的地理坐标系统请参照 <https://spatialreference.org/>
 
+
 &#x2002; &#x2003; 返回值
 
 &#x2002; &#x2003; &#x2002; &#x2003; 用于描述渲染样式的 VegaWeightedPointMap 对象。
@@ -115,6 +116,7 @@
 
 &#x2002; &#x2003; &#x2002; &#x2003; * aggregation_type(str) -- 可选参数，表示输入数据到图片像素热力的聚合方式，默认值为"max"
 
+
 &#x2002; &#x2003; 返回值
 
 &#x2002; &#x2003; &#x2002; &#x2003; 用于描述渲染样式的 VegaHeatMap 对象。
@@ -157,6 +159,7 @@
 
 &#x2002; &#x2003; &#x2002; &#x2003; * aggregation_type(str) -- 可选参数，表示输入数据到轮廓权重的聚合方式，默认值为"sum"
 
+
 &#x2002; &#x2003; 返回值
 
 &#x2002; &#x2003; &#x2002; &#x2003; 用于描述渲染样式的 VegaChoroplethMap 对象。
@@ -171,9 +174,45 @@
 
   ```python
       >>> # 绘制宽为1024，高为896，颜色值在蓝色和红色之间的轮廓图
-      >>> vega = arctern.util.vega.vega_choroplethmap(1900, 1410, bounding_box=[-73.994092, 40.753893, -73.977588, 40.759642], color_gradient=["#0000FF", "#FF0000"], color_bound=[2.5, 5], opacity=0.5, coordinate_system="EPSG:4326")
+      >>> vega = arctern.util.vega.vega_choroplethmap(1024, 896, bounding_box=[-73.994092, 40.753893, -73.977588, 40.759642], color_gradient=["#0000FF", "#FF0000"], color_bound=[2.5, 5], opacity=0.5, coordinate_system="EPSG:4326")
    ```
 
+
+<font size="5">**vega_icon**</font><br /> 
+
+**arctern.util.vega.vega_icon(width,height,bounding_box,icon_path,coordinate_system)**
+
+&#x2002; &#x2003; 根据给定的配置参数，构建描述渲染样式的 VegaIcon 对象。
+
+&#x2002; &#x2003; 参数
+
+&#x2002; &#x2003; &#x2002; &#x2003; * width(int) -- 图片宽度，单位为像素个数
+
+&#x2002; &#x2003; &#x2002; &#x2003; * height(int) -- 图片高度，单位为像素个数
+
+&#x2002; &#x2003; &#x2002; &#x2003; * bounding_box(list) -- 图片对应的地理坐标区域，以 [x_min, y_min, x_max, y_max] 的形式表示一个矩形区域。图片左下角的像素坐标 (0, 0) 对应实际地理坐标 (x_min, y_min) ，图片右上角的像素坐标 (width, height) 对应实际地理坐标 (x_max, y_max)
+
+&#x2002; &#x2003; &#x2002; &#x2003; * icon_path(str) -- 图标png文件的绝对路径
+
+&#x2002; &#x2003; &#x2002; &#x2003; * coordinate_system(str) -- 可选参数，表示输入数据所属的地理坐标系统，默认值为"EPSG:3857"，当前支持的地理坐标系统请参照 <https://spatialreference.org/>
+
+
+&#x2002; &#x2003; 返回值
+
+&#x2002; &#x2003; &#x2002; &#x2003; 用于描述渲染样式的 VegaIcon 对象。
+
+
+&#x2002; &#x2003; 返回值类型
+   
+&#x2002; &#x2003; &#x2002; &#x2003; arctern.util.vega.icon.vega_icon.VegaIcon
+
+
+&#x2002; &#x2003; 示例:
+
+  ```python
+      >>> # 绘制宽为1024，高为896，带出租车图标的图标图
+      >>> vega = arctern.util.vega.vega_icon(1024, 896, bounding_box=[-73.994092, 40.753893, -73.977588, 40.759642], icon_path='/tmp/taxi.png', coordinate_system="EPSG:4326")
+   ```
 
 
 
@@ -361,6 +400,7 @@
 
 &#x2002; &#x2003; &#x2002; &#x2003; * weights(Series(dtype: float64|int64)) -- 轮廓的颜色权重
 
+
 &#x2002; &#x2003; 返回值
 
 &#x2002; &#x2003; &#x2002; &#x2003; base64编码的png图片。
@@ -389,6 +429,56 @@
       >>> vega = vega_choroplethmap(1922, 1663, bounding_box=[-74.01124953254566,40.73413446570038,-73.96238859103838,40.766161712662296], color_gradient=["#0000FF","#FF0000"], color_bound=[2.5, 5], opacity=1.0, coordinate_system='EPSG:4326', aggregation_type="mean") 
       >>> png = arctern.choropleth_map(vega, polygon, input1['color_weights'])
       >>> save_png(png, "/tmp/python_choroplethmap.png")
+   ```
+
+
+<font size="5">**icon_viz**</font><br /> 
+
+**arctern.icon_viz(vega, points)**
+
+&#x2002; &#x2003; 绘制图标图。
+
+&#x2002; &#x2003; 参数
+
+&#x2002; &#x2003; &#x2002; &#x2003; * vega(VegaIcon) -- VegaIcon 对象
+
+&#x2002; &#x2003; &#x2002; &#x2003; * points(Series(dtype: object)) -- 绘制图标图所对应的点，格式为WKB
+
+
+&#x2002; &#x2003; 返回值
+
+&#x2002; &#x2003; &#x2002; &#x2003; base64编码的png图片。
+
+
+&#x2002; &#x2003; 返回值类型
+   
+&#x2002; &#x2003; &#x2002; &#x2003; bytes
+
+
+&#x2002; &#x2003; 示例:
+
+  ```python
+      >>> import pandas as pd
+      >>> import numpy as np
+      >>> import arctern
+      >>> from arctern.util import save_png
+      >>> from arctern.util.vega import vega_icon
+      >>> 
+      >>> # 读取 csv 文件并创建绘图数据
+      >>> df = pd.read_csv("test_data.csv", dtype={'longitude':np.float64, 'latitude':np.float64, 'color_weights':np.float64, 'size_weights':np.float64, 'region_boundaries':np.object})
+      >>> region = arctern.ST_GeomFromText(pd.Series(['POLYGON ((-74.01424568752932 40.72759334104623, -74.01424568752932 40.76721122683304, -73.96056823889673 40.76721122683304, -73.96056823889673 40.72759334104623, -74.01424568752932 40.72759334104623))']))
+      >>> d=pd.DataFrame(region).T
+      >>> region = region.append([d]*df.shape[0])
+      >>> in_region = arctern.ST_Within(arctern.ST_Point(df['longitude'], df['latitude']), region[0])
+      >>> df['in_region']=in_region
+      >>> input1 = df[df.in_region == True].reset_index()
+      >>> 
+      >>> points = arctern.ST_Point(input1['longitude'], input1['latitude'])
+      >>> 
+      >>> # 根据 input1['color_weights'] 绘制热力图
+      >>> vega = vega_icon(1824, 1777, bounding_box=[-74.01424568752932, 40.72759334104623, -73.96056823889673, 40.76721122683304], icon_path='/tmp/taxi.png', coordinate_system='EPSG:4326')
+      >>> png = arctern.icon_viz(vega, points)
+      >>> save_png(png, "/tmp/python_icon_viz.png")
    ```
 
 
@@ -627,6 +717,59 @@
       >>> vega = vega_choroplethmap(1922, 1663, bounding_box=[-74.01124953254566,40.73413446570038,-73.96238859103838,40.766161712662296], color_gradient=["#115f9a","#d0f400"], color_bound=[5,18], opacity=1.0, coordinate_system='EPSG:4326', aggregation_type="mean") 
       >>> res = choroplethmap(vega, df)
       >>> save_png(res, '/tmp/choroplethmap1.png')
+      >>> 
+      >>> spark.sql("show tables").show()
+      >>> spark.catalog.dropGlobalTempView("test_table")
+   ```
+
+
+<font size="5">**icon_viz**</font><br /> 
+
+**arctern_pyspark.icon_viz(vega, points)**
+
+&#x2002; &#x2003; 绘制图标图。
+
+&#x2002; &#x2003; 参数
+
+&#x2002; &#x2003; &#x2002; &#x2003; * vega(VegaIcon) -- VegaIcon 对象
+
+&#x2002; &#x2003; &#x2002; &#x2003; * points(WKB) -- 绘制图标图所对应的点，格式为WKB
+
+
+&#x2002; &#x2003; 返回值
+
+&#x2002; &#x2003; &#x2002; &#x2003; base64编码的png图片。
+
+
+&#x2002; &#x2003; 返回值类型
+   
+&#x2002; &#x2003; &#x2002; &#x2003; bytes
+
+
+&#x2002; &#x2003; 示例:
+
+  ```python
+      >>> from arctern.util import save_png
+      >>> from arctern.util.vega import vega_icon
+      >>> from arctern_pyspark import register_funcs
+      >>> from arctern_pyspark import icon_viz
+      >>> from pyspark.sql import SparkSession
+      >>> 
+      >>> spark_session = SparkSession.builder.appName("Python Arrow-in-Spark example").getOrCreate()
+      >>> spark_session.conf.set("spark.sql.execution.arrow.pyspark.enabled", "true")
+      >>> 
+      >>> table_df = spark.read.format("csv").option("header", True).option("delimiter", ",").schema(
+      >>>     "longitude double, latitude double, color_weights double, size_weights double, region_boundaries string").load(
+      >>>     "file:///tmp/test_data.csv").cache()
+      >>> table_df.createOrReplaceTempView("test_table")
+      >>> 
+      >>> register_funcs(spark)
+      >>> 
+      >>> # df 包含 1 列 series ，为wkb类型的points
+      >>> df = spark.sql("select ST_Point(longitude, latitude) as point from test_table where ST_Within(ST_Point(longitude, latitude), ST_GeomFromText('POLYGON ((-74.01424568752932 40.72759334104623, -74.01424568752932 40.76721122683304, -73.96056823889673 40.76721122683304, -73.96056823889673 40.72759334104623, -74.01424568752932 40.72759334104623))'))")
+      >>> vega = vega_icon(1824, 1777, bounding_box=[-74.01424568752932, 40.72759334104623, -73.96056823889673, 40.76721122683304], icon_path='/tmp/taxi.png', coordinate_system='EPSG:4326')
+      >>> res = icon_viz(vega, df)
+      >>> save_png(res, '/tmp/icon_viz.png')
       >>> 
       >>> spark.sql("show tables").show()
       >>> spark.catalog.dropGlobalTempView("test_table")
