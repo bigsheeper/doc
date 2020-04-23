@@ -36,10 +36,10 @@
 &#x2002; &#x2003; 示例:
 
   ```python
-      >>> # 绘制宽为1024，高为896，点直径为3的，点颜色为蓝色的完全不透明点图
+      >>> # 绘制宽为1024，高为896的点图，点直径为3的，颜色为蓝色，不透明度为1.0
       >>> vega = arctern.util.vega.vega_pointmap(1024, 896, bounding_box=[-8237467.21, 4972643.32, -8232560.36, 4980065.63])
       >>> 
-      >>> # 绘制宽为1024，高为896，点直径为10的，点颜色为红色的半透明点图
+      >>> # 绘制宽为1024，高为896的点图，点直径为3的，颜色为蓝色，不透明度为0.5
       >>> vega = arctern.util.vega.vega_pointmap(1024, 896, bounding_box=[-73.998427, 40.730309, -73.954348, 40.780816], point_size=10, point_color="#FF0000", opacity=0.5, coordinate_system="EPSG:4326")
    ```
 
@@ -235,9 +235,9 @@
 
 # pandas 接口
 
-<font size="5">**pointmap**</font><br /> 
+<font size="5">**point_map_layer**</font><br /> 
 
-**arctern.pointmap(vega, points)**
+**arctern.point_map_layer(vega, points)**
 
 &#x2002; &#x2003; 绘制点图。
 
@@ -280,14 +280,14 @@
       >>> 
       >>> # 绘制点大小为3，点颜色为#2DEF4A，点不透明度为0.5的点图
       >>> vega = vega_pointmap(1903, 1777, bounding_box=[-74.01398981737215,40.71353244267465,-73.96979949831308,40.74480271529791], point_size=3, point_color="#2DEF4A", opacity=0.5, coordinate_system="EPSG:4326")
-      >>> png = arctern.point_map(vega, points)
+      >>> png = arctern.point_map_layer(vega, points)
       >>> save_png(png, "/tmp/python_pointmap.png")
    ```
 
 
-<font size="5">**weighted_pointmap**</font><br /> 
+<font size="5">**weighted_point_map_layer**</font><br /> 
 
-**arctern.weighted_pointmap(vega, points, color_weights, size_weights)**
+**arctern.weighted_point_map_layer(vega, points, color_weights, size_weights)**
 
 &#x2002; &#x2003; 绘制带权重的点图，权重用于决定点的大小和颜色。
 
@@ -336,24 +336,24 @@
       >>> 
       >>> # 绘制带权点图，点的大小为 10，点的颜色根据 input1['color_weights'] 在 "#0000FF" ~ "#FF0000" 之间变化
       >>> vega1 = vega_weighted_pointmap(1740, 1767, bounding_box=[-73.99668712186558,40.72972339069935,-73.99045479584949,40.7345193345495], color_gradient=["#0000FF", "#FF0000"], color_bound=[1, 5], size_bound=[10], opacity=1.0, coordinate_system="EPSG:4326")
-      >>> png1 = arctern.weighted_point_map(vega1, points1, color_weights=input1['color_weights'])
+      >>> png1 = arctern.weighted_point_map_layer(vega1, points1, color_weights=input1['color_weights'])
       >>> save_png(png1, "/tmp/python_weighted_pointmap1.png")  
       >>> 
       >>> # 绘制带权点图，点的颜色为'#37A2DA'，点的大小根据 input2['size_weights'] 在 1 ~ 10 之间变化
       >>> vega2 = vega_weighted_pointmap(1740, 1767, bounding_box=[-73.99668712186558,40.72972339069935,-73.99045479584949,40.7345193345495], color_gradient=["#37A2DA"], size_bound=[1, 10], opacity=1.0, coordinate_system="EPSG:4326")
-      >>> png2 = arctern.weighted_point_map(vega2, points2, size_weights=input2['size_weights'])
+      >>> png2 = arctern.weighted_point_map_layer(vega2, points2, size_weights=input2['size_weights'])
       >>> save_png(png2, '/tmp/python_weighted_pointmap2.png')  
       >>> 
       >>> # 绘制带权点图，点的颜色根据 input2['color_weights'] 在 "#0000FF" ~ "#FF0000" 之间变化，点的大小根据 input2['size_weights'] 在 1 ~ 10 之间变化
       >>> vega3 = vega_weighted_pointmap(1740, 1767, bounding_box=[-73.99668712186558,40.72972339069935,-73.99045479584949,40.7345193345495], color_gradient=["#0000FF", "#FF0000"], color_bound=[1,5], size_bound=[1, 10], opacity=1.0, coordinate_system="EPSG:4326")
-      >>> png3 = arctern.weighted_point_map(vega3, points2, color_weights=input2['color_weights'], size_weights=input2['size_weights'])
+      >>> png3 = arctern.weighted_point_map_layer(vega3, points2, color_weights=input2['color_weights'], size_weights=input2['size_weights'])
       >>> save_png(png3, '/tmp/python_weighted_pointmap3.png')
    ```
 
 
-<font size="5">**heatmap**</font><br /> 
+<font size="5">**heat_map_layer**</font><br /> 
 
-**arctern.heatmap(vega, points, weights)**
+**arctern.heat_map_layer(vega, points, weights)**
 
 &#x2002; &#x2003; 绘制热力图，权重用于决定热力值。
 
@@ -398,14 +398,14 @@
       >>> 
       >>> # 根据 input1['color_weights'] 绘制热力图
       >>> vega = vega_heatmap(1824, 1777, bounding_box=[-74.01424568752932, 40.72759334104623, -73.96056823889673, 40.76721122683304], map_zoom_level=10.0, coordinate_system='EPSG:4326')
-      >>> png = arctern.heat_map(vega, points, input1['color_weights'])
+      >>> png = arctern.heat_map_layer(vega, points, input1['color_weights'])
       >>> save_png(png, "/tmp/python_heatmap.png") 
    ```
 
 
-<font size="5">**choroplemap**</font><br /> 
+<font size="5">**choropleth_map_layer**</font><br /> 
 
-**arctern.choroplemap(vega, region_boundaries, weights)**
+**arctern.choropleth_map_layer(vega, region_boundaries, weights)**
 
 &#x2002; &#x2003; 绘制轮廓图，权重用于决定轮廓的颜色。
 
@@ -444,14 +444,14 @@
       >>> 
       >>> # 绘制轮廓图，轮廓的颜色根据 input1['color_weights'] 在 "#0000FF" ~ "#FF0000" 之间变化
       >>> vega = vega_choroplethmap(1922, 1663, bounding_box=[-74.01124953254566,40.73413446570038,-73.96238859103838,40.766161712662296], color_gradient=["#0000FF","#FF0000"], color_bound=[2.5, 5], opacity=1.0, coordinate_system='EPSG:4326', aggregation_type="mean") 
-      >>> png = arctern.choropleth_map(vega, polygon, input1['color_weights'])
+      >>> png = arctern.choropleth_map_layer(vega, polygon, input1['color_weights'])
       >>> save_png(png, "/tmp/python_choroplethmap.png")
    ```
 
 
-<font size="5">**icon_viz**</font><br /> 
+<font size="5">**icon_viz_layer**</font><br /> 
 
-**arctern.icon_viz(vega, points)**
+**arctern.icon_viz_layer(vega, points)**
 
 &#x2002; &#x2003; 绘制图标图。
 
@@ -494,7 +494,7 @@
       >>> 
       >>> # 根据 input1['color_weights'] 绘制图标图
       >>> vega = vega_icon(1824, 1777, bounding_box=[-74.01424568752932, 40.72759334104623, -73.96056823889673, 40.76721122683304], icon_path='/tmp/taxi.png', coordinate_system='EPSG:4326')
-      >>> png = arctern.icon_viz(vega, points)
+      >>> png = arctern.icon_viz_layer(vega, points)
       >>> save_png(png, "/tmp/python_icon_viz.png")
    ```
 
