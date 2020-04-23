@@ -149,11 +149,11 @@
 
 &#x2002; &#x2003; &#x2002; &#x2003; * bounding_box(list) -- 图片对应的地理坐标区域，以 [x_min, y_min, x_max, y_max] 的形式表示一个矩形区域。图片左下角的像素坐标 (0, 0) 对应实际地理坐标 (x_min, y_min) ，图片右上角的像素坐标 (width, height) 对应实际地理坐标 (x_max, y_max)
 
-&#x2002; &#x2003; &#x2002; &#x2003; * color_gradient(list) -- 点的颜色渐变范围，表示形式为 ["hex_color"] 或 ["hex_color1", "hex_color2"]。当形式为["hex_color"] 时所有点的颜色相同。当形式为["hex_color1", "hex_color2"] 时点的颜色由输入数据中一列的值（权重）决定，且颜色在 "hex_color1" ~ "hex_color2" 之间变化
+&#x2002; &#x2003; &#x2002; &#x2003; * color_gradient(list) -- 轮廓的颜色渐变范围，表示形式为 ["hex_color"] 或 ["hex_color1", "hex_color2"]。当形式为["hex_color"] 时所有轮廓的颜色相同。当形式为["hex_color1", "hex_color2"] 时轮廓的颜色由输入数据中一列的值（权重）决定，且颜色在 "hex_color1" ~ "hex_color2" 之间变化
 
 &#x2002; &#x2003; &#x2002; &#x2003; * color_bound(list) -- 可选参数，用于描述权重与颜色的对应关系，仅当color_gradient中包含两个颜色值时需要设置，表示形式为 [color_min, color_max]。权重值小于等于 color_min 时点的颜色为"hex_color1"， 权重值大于等于 color_max 时点的颜色为"hex_color2"
 
-&#x2002; &#x2003; &#x2002; &#x2003; * opacity(float) -- 可选参数，表示点的不透明度，范围为 0.0 ~ 1.0，默认值为 1.0
+&#x2002; &#x2003; &#x2002; &#x2003; * opacity(float) -- 可选参数，表示轮廓的不透明度，范围为 0.0 ~ 1.0，默认值为 1.0
 
 &#x2002; &#x2003; &#x2002; &#x2003; * coordinate_system(str) -- 可选参数，表示输入数据所属的地理坐标系统，默认值为"EPSG:3857"，当前支持的地理坐标系统请参照 <https://spatialreference.org/>
 
@@ -475,7 +475,7 @@
       >>> 
       >>> points = arctern.ST_Point(input1['longitude'], input1['latitude'])
       >>> 
-      >>> # 根据 input1['color_weights'] 绘制热力图
+      >>> # 根据 input1['color_weights'] 绘制图标图
       >>> vega = vega_icon(1824, 1777, bounding_box=[-74.01424568752932, 40.72759334104623, -73.96056823889673, 40.76721122683304], icon_path='/tmp/taxi.png', coordinate_system='EPSG:4326')
       >>> png = arctern.icon_viz(vega, points)
       >>> save_png(png, "/tmp/python_icon_viz.png")
@@ -528,7 +528,7 @@
       >>> 
       >>> register_funcs(spark)
       >>> 
-      >>> # df 是只有一列数据的 pyspark dataframe, 该列数据的表示点坐标，类型为 wkb 格式的 point
+      >>> # df 是包含 1 列数据的 pyspark.Dataframe, 该列为 WKB 类型的points
       >>> # 绘制点大小为10，点颜色为#37A2DA，点不透明度为1.0的点图
       >>> df = spark.sql("SELECT ST_Point (longitude, latitude) AS point FROM test_table WHERE (ST_Within (ST_Point (longitude, latitude), ST_GeomFromText('POLYGON ((-74.01398981737215 40.71353244267465, -74.01398981737215 40.74480271529791, -73.96979949831308 40.74480271529791, -73.96979949831308 40.71353244267465, -74.01398981737215 40.71353244267465))'))) LIMIT 10000")
       >>> vega = vega_pointmap(1903, 1777, bounding_box=[-74.01398981737215,40.71353244267465,-73.96979949831308,40.74480271529791], point_size=10, point_color="#37A2DA", opacity=1.0, coordinate_system="EPSG:4326")
@@ -586,21 +586,21 @@
       >>> 
       >>> register_funcs(spark)
       >>> 
-      >>> # df1 包含 2 列 series ，第一列为wkb类型的points，第二列为点颜色大小的权重数据
+      >>> # df1 是包含 2 列数据的 pyspark.Dataframe，第一列为 WKB 类型的points，第二列为点颜色大小的权重数据
       >>> # 绘制带权点图，点的颜色根据 color_weights 在 "#115f9a" ~ "#d0f400" 之间变化，点的大小为 16   
       >>> df1 = spark.sql("SELECT ST_Point (longitude, latitude) AS point, color_weights FROM test_table WHERE (ST_Within (ST_Point (longitude, latitude), ST_GeomFromText('POLYGON ((-73.99668712186558 40.72972339069935, -73.99668712186558 40.7345193345495, -73.99045479584949 40.7345193345495, -73.99045479584949 40.72972339069935, -73.99668712186558 40.72972339069935))'))) LIMIT 20000")
       >>> vega1 = vega_weighted_pointmap(1740, 1767, bounding_box=[-73.99668712186558,40.72972339069935,-73.99045479584949,40.7345193345495], color_gradient=["#115f9a", "#d0f400"], color_bound=[2.5,15], size_bound=[16], opacity=1.0, coordinate_system="EPSG:4326")
       >>> res1 = weighted_pointmap(vega1, df1)
       >>> save_png(res1, '/tmp/weighted_pointmap_1_0.png')
       >>> 
-      >>> # df2 包含 2 列 series ，第一列为wkb类型的points，第二列为点大小的权重数据
+      >>> # df2 是包含 2 列数据的 pyspark.Dataframe，第一列为 WKB 类型的points，第二列为点大小的权重数据
       >>> # 绘制带权点图，点的颜色为'#37A2DA'，点的大小根据 size_weights 在 15 ~ 50 之间变化      
       >>> df2 = spark.sql("SELECT ST_Point (longitude, latitude) AS point, size_weights FROM test_table WHERE (ST_Within (ST_Point (longitude, latitude), ST_GeomFromText('POLYGON ((-73.99668712186558 40.72972339069935, -73.99668712186558 40.7345193345495, -73.99045479584949 40.7345193345495, -73.99045479584949 40.72972339069935, -73.99668712186558 40.72972339069935))'))) LIMIT 2000")
       >>> vega2 = vega_weighted_pointmap(1740, 1767, bounding_box=[-73.99668712186558,40.72972339069935,-73.99045479584949,40.7345193345495], color_gradient=["#37A2DA"], size_bound=[15, 50], opacity=1.0, coordinate_system="EPSG:4326")
       >>> res2 = weighted_pointmap(vega2, df2)
       >>> save_png(res2, '/tmp/weighted_pointmap_0_1.png')
       >>> 
-      >>> # df3 包含 3 列 series ，第一列为wkb类型的points，第二列为点颜色的权重数据，第三列为点大小的权重数据
+      >>> # df3 是包含 3 列数据的 pyspark.Dataframe，第一列为 WKB 类型的points，第二列为点颜色的权重数据，第三列为点大小的权重数据
       >>> # 绘制带权点图，点的颜色根据 color_weights 在 "#115f9a" ~ "#d0f400" 之间变化，点的大小根据 size_weights 在 15 ~ 50 之间变化      
       >>> df3 = spark.sql("SELECT ST_Point (longitude, latitude) AS point, color_weights, size_weights FROM test_table WHERE (ST_Within (ST_Point (longitude, latitude), ST_GeomFromText('POLYGON ((-73.99668712186558 40.72972339069935, -73.99668712186558 40.7345193345495, -73.99045479584949 40.7345193345495, -73.99045479584949 40.72972339069935, -73.99668712186558 40.72972339069935))'))) LIMIT 2000")
       >>> vega3 = vega_weighted_pointmap(1740, 1767, bounding_box=[-73.99668712186558,40.72972339069935,-73.99045479584949,40.7345193345495], color_gradient=["#115f9a", "#d0f400"], color_bound=[2.5,15], size_bound=[15, 50], opacity=1.0, coordinate_system="EPSG:4326")
@@ -656,7 +656,7 @@
       >>> 
       >>> register_funcs(spark)
       >>> 
-      >>> # df 包含 2 列 series ，第一列为wkb类型的points，第二列数据表示点热度
+      >>> # df 是包含 2 列数据的 pyspark.Dataframe，第一列为 WKB 类型的points，第二列为点的热度
       >>> # 根据 color_weights 绘制热力图      
       >>> df = spark.sql("select ST_Point(longitude, latitude) as point, color_weights from test_table where ST_Within(ST_Point(longitude, latitude), ST_GeomFromText('POLYGON ((-74.01424568752932 40.72759334104623, -74.01424568752932 40.76721122683304, -73.96056823889673 40.76721122683304, -73.96056823889673 40.72759334104623, -74.01424568752932 40.72759334104623))'))")
       >>> vega = vega_heatmap(1824, 1777, bounding_box=[-74.01424568752932, 40.72759334104623, -73.96056823889673, 40.76721122683304], map_zoom_level=14.544283200495824, coordinate_system='EPSG:4326')
@@ -710,10 +710,9 @@
       >>> table_df.createOrReplaceTempView("test_table")
       >>> 
       >>> register_funcs(spark)
-      >>> # df 包含 2 列 series ，wkb类型的polygons，第二列数据表示多边形的权值
+      >>> # df 是包含 2 列数据的 pyspark.Dataframe， 第一列为 WKB 类型的polygons，第二列为轮廓颜色的权值
       >>> # 绘制轮廓图，轮廓的颜色根据 color_weights 在 "#115f9a" ~ "#d0f400" 之间变化
       >>> df = spark.sql("SELECT ST_GeomFromText(region_boundaries) AS wkb, color_weights AS color FROM test_table WHERE ((region_boundaries !=''))")
-      >>> 
       >>> vega = vega_choroplethmap(1922, 1663, bounding_box=[-74.01124953254566,40.73413446570038,-73.96238859103838,40.766161712662296], color_gradient=["#115f9a","#d0f400"], color_bound=[5,18], opacity=1.0, coordinate_system='EPSG:4326', aggregation_type="mean") 
       >>> res = choroplethmap(vega, df)
       >>> save_png(res, '/tmp/choroplethmap1.png')
@@ -765,7 +764,7 @@
       >>> 
       >>> register_funcs(spark)
       >>> 
-      >>> # df 包含 1 列 series ，为wkb类型的points
+      >>> # df 是包含 1 列数据的 pyspark.Dataframe，该列为 WKB 类型的points
       >>> df = spark.sql("select ST_Point(longitude, latitude) as point from test_table where ST_Within(ST_Point(longitude, latitude), ST_GeomFromText('POLYGON ((-74.01424568752932 40.72759334104623, -74.01424568752932 40.76721122683304, -73.96056823889673 40.76721122683304, -73.96056823889673 40.72759334104623, -74.01424568752932 40.72759334104623))'))")
       >>> vega = vega_icon(1824, 1777, bounding_box=[-74.01424568752932, 40.72759334104623, -73.96056823889673, 40.76721122683304], icon_path='/tmp/taxi.png', coordinate_system='EPSG:4326')
       >>> res = icon_viz(vega, df)
