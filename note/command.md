@@ -28,6 +28,12 @@ or simply
 `git pull --recurse-submodules`
 ######remove modify, reset to HEAD
 `git reset --hard HEAD`
+######pull remote branch from somebody else's repo
+```
+git remote add coworker git://path/to/coworkers/repo.git
+git fetch coworker
+git checkout --track coworker/foo
+```
 
 ##Others
 ######use objdump to check function sign
