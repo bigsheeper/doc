@@ -1,9 +1,7 @@
 # arctern/scala
 
-## 1. scala环境搭建
-
+## 1. scala 环境搭建
 - 安装 Java 8 JDK，见 <https://www.oracle.com/java/technologies/javase-jdk8-downloads.html>
-
 - 安装 sbt
 ```
 echo "deb https://dl.bintray.com/sbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
@@ -12,16 +10,23 @@ sudo apt-get update
 sudo apt-get install sbt
 ```
 
-## 2. 运行
+## 2. 编译
 ```
 cd arctern/scala
 sbt
 ```
-等待 build 成功后，在 sbt 交互界面中输入
+- 可使用 -D 传入编译参数。例如选择 spark 的版本，则使用如下命令编译
+```
+sbt -DsparkVersion="2.4.5"
+```
+
+## 3. 运行
+在 sbt 交互界面中输入
 ```
 test
 ```
-若要设置 java options, 如增加 GC limit 等，则在运行 test 前在交互界面中输入
+- 可使用 set 进行相关设置。例如设置 java GC limit，则在交互界面中输入
 ```
 set javaOptions += "-Xmx5G"
 ```
+
