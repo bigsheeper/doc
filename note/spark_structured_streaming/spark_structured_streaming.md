@@ -45,12 +45,17 @@ Spark 结构化流是基于 Spark SQL 引擎上的可扩展和具有容错性的
 - One-time micro-batch。只会执行一次，执行之后便结束。
 - Continuous with fixed checkpoint interval。基于 Continuous Processing 的触发器模式。延迟仅为 1 ms。
 
-## 参考
+## 参考链接
 
 主要参考：
+
 <https://spark.apache.org/docs/3.0.0-preview/structured-streaming-programming-guide.html>
 
 其它参考：
+
 <https://ohmycloud.github.io/2018/11/27/a-tour-of-spark-structured-streaming/>
 <https://zhuanlan.zhihu.com/p/51883927>
 <https://spark.apache.org/docs/3.0.0-preview/structured-streaming-kafka-integration.html>
+<https://databricks.com/blog/2017/04/04/real-time-end-to-end-integration-with-apache-kafka-in-apache-sparks-structured-streaming.html>
+<https://databricks.com/blog/2016/07/28/structured-streaming-in-apache-spark.html>
+<https://databricks.com/blog/2017/04/26/processing-data-in-apache-kafka-with-structured-streaming-in-apache-spark-2-2.html>
