@@ -139,6 +139,13 @@ git fetch coworker
 git checkout --track coworker/foo
 ```
 
+cherry pick commit from another branch
+
+```
+git checkout -b branch-0.3-x_to_push
+git cherry-pick commit-id-from-old-branch
+```
+
 
 
 ## Gdal
