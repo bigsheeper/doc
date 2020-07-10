@@ -95,6 +95,14 @@ jupyter notebook --ip=172.17.0.2 --port=8888 --allow-root
 # then open ip:port with web browser, ip=host_ip, port=hsot_port_maping_to_docker
 ```
 
+get postgis image and create container 
+```bash
+sudo docker run --name some-postgis -e POSTGRES_PASSWORD=mysecretpassword -d mdillon/postgis
+# in docker, run postgis by:
+# psql -U postgres
+# select st_area('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))'::geometry);
+```
+
 
 
 ## Git
