@@ -39,14 +39,28 @@ go run hello.go
 
 ## 运行 Project
 
-在 Project 主目录中下载所有的依赖：
+go 会默认建立一个全局仓库 $HOME/go
+之后，在 Project 主目录中导入所有的依赖，依赖将会被导入至 $GOPATH 中：
 
 ```bash
 go get ./...
 ```
 
-之后以同样的方式运行 Project 中带有 main 函数的测试文件：
+以同样的方式运行 Project 中带有 main 函数的测试文件：
 
 ```bash
 go run test.go
 ```
+
+## 在 IDE goland 中配置运行 Project
+
+### 1. 使用 goland 打开 Project，
+
+### 2. 设置 GOROOT
+
+在 Settings->Go->GOROOT 中设置 SDK，可选择在线下载或本地导入
+
+### 3. 设置 GOPATH
+
+在 Settings->Go->GOPATH 中将 Global GOPATH 设置为 $HOME/go
+
