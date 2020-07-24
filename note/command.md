@@ -1,9 +1,6 @@
 # Commands
 
-
-
 ## Docker
-
 
 ### Image
 
@@ -35,7 +32,6 @@ docker commit :从容器创建一个新的镜像
 
 `docker commit CONTAINER_ID IMAGE_NAME:TAG`
 
-
 ### Container
 
 check running docker prosess
@@ -58,7 +54,6 @@ docker remove container
 
 `sudo docker container rm $CONTAINER_ID`
 
-
 ### Nvidia docker
 
 install nvidia-docker
@@ -77,7 +72,6 @@ run nvidia-docker
 
 `sudo docker run --gpus all -p 9999:8888 -it $IMAGE_ID /bin/bash`
 
-
 ### Others
 
 docker cp
@@ -95,15 +89,14 @@ jupyter notebook --ip=172.17.0.2 --port=8888 --allow-root
 # then open ip:port with web browser, ip=host_ip, port=hsot_port_maping_to_docker
 ```
 
-get postgis image and create container 
+get postgis image and create container
+
 ```bash
 sudo docker run --name some-postgis -e POSTGRES_PASSWORD=mysecretpassword -d mdillon/postgis
 # in docker, run postgis by:
 # psql -U postgres
 # select st_area('POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))'::geometry);
 ```
-
-
 
 ## Git
 
@@ -141,7 +134,7 @@ remove modify, reset to HEAD
 
 pull remote branch from somebody else's repo
 
-```
+```bash
 git remote add coworker git://path/to/coworkers/repo.git
 git fetch coworker
 git checkout --track coworker/foo
@@ -149,12 +142,10 @@ git checkout --track coworker/foo
 
 cherry pick commit from another branch
 
-```
+```bash
 git checkout -b branch-0.3-x_to_push
 git cherry-pick commit-id-from-old-branch
 ```
-
-
 
 ## Gdal
 
@@ -182,8 +173,6 @@ Output file format name. Starting with GDAL 2.3, if not specified, the format is
 
 About polygon -- [参考链接1](http://esri.github.io/geometry-api-java/doc/Polygon.html) -- [参考链接2](https://github.com/Esri/geometry-api-java/wiki)
 
-
-
 ## Kafka
 
 override kafka conf, set max message bytes
@@ -192,8 +181,7 @@ override kafka conf, set max message bytes
 
 check topic conf, check max message bytes
 
-`bin/kafka-configs.sh --zookeeper localhost:9092 --entity-type topics --entity-name connect-test --describe
-`
+`bin/kafka-configs.sh --zookeeper localhost:9092 --entity-type topics --entity-name connect-test --describe`
 
 check message size of a topic
 
@@ -204,7 +192,53 @@ produce massage from file
 
 `bin/kafka-console-producer.sh --broker-list localhost:9092 --topic test < test.txt`
 
-## Others
+## kubernetes
+
+### minikube
+
+start service
+`minikube service $service-name`
+
+<https://minikube.sigs.k8s.io/docs/commands/>
+
+### kubectl
+
+get all pods in all namespaces
+
+`kubectl get pods --all-namespaces`
+
+get cluster info
+
+`kubectl cluster-info`
+
+get pods
+
+`kubectl get pods`
+
+get pods infos
+
+`kubectl describe pod <pod_name>`
+
+get pods infos in specific namespace
+
+`kubectl describe pod <podname> -n <namespace>`
+
+deployment nginx
+
+`kubectl apply -f https://k8s.io/examples/application/deployment.yaml`
+
+get deployment
+`kubectl get deployment`
+
+get deployment info
+
+`kubectl describe deployment <deployment-name>`
+
+delete deployment
+
+`kubectl delete deployment <deployment-name>`
+
+## Other
 
 use objdump to check function sign
 
