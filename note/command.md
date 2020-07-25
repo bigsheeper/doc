@@ -203,6 +203,8 @@ start service
 
 ### kubectl
 
+<https://docs.docker.com/config/daemon/systemd/>
+
 get all pods in all namespaces
 
 `kubectl get pods --all-namespaces`
