@@ -69,3 +69,56 @@ K8s GC 在删除一个对象时，任何 ownerReference 是该对象的对象都
 用于保证 reconciling 的所有逻辑都被定义在 **Reconciler** 中。每个 Reconciler 都包含两个元素：期望状态所包含的对象、是否需要重新 reconciling 的 bool 值。
 
 一个控制器与一个 kind 相对应。
+
+### Reconciler
+
+kubebuilder 会为我们搭建一个基础的 reconciler，包含一个 client，一个 logger以及一个 scheme：
+
+```Go
+// CronJobReconciler reconciles a CronJob object
+type CronJobReconciler struct {
+    client.Client
+    Log    logr.Logger
+    Scheme *runtime.Scheme
+}
+```
+
+### 访问授权
+
+在 Kubernetes 中，授权有 ABAC（基于属性的访问控制）、RBAC（基于角色的访问控制）、Webhook、Node、AlwaysDeny（一直拒绝）和 AlwaysAllow（一直允许）这6种模式。
+
+我们需要赋予控制器能够在集群中运行的门槛权限，该权限赋予通过 controller-tools 注释实现：
+
+```Go
+// +kubebuilder:rbac:groups=batch.tutorial.kubebuilder.io,resources=cronjobs,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=batch.tutorial.kubebuilder.io,resources=cronjobs/status,verbs=get;update;patch
+```
+
+### Reconcile
+
+Reconcile 是 Reconciler 的一个函数。通过 Reconciler 中的 client 可以获取 cache 中的对象（此处仅仅用到了 Reconciler 的 log），通过返回空结果来表示已经完成 reconciling。
+
+context 是所有 client 方法中的第一个参数，用于取消请求和追踪等操作。
+
+```Go
+func (r *CronJobReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
+    _ = context.Background()
+    _ = r.Log.WithValues("cronjob", req.NamespacedName)
+
+    // your logic here
+
+    return ctrl.Result{}, nil
+}
+```
+
+### SetupWithManager
+
+SetupWithManager 也是 Reconciler 的一个函数，用于将当前的 Reconciler 添加到 manager 中，当 manager 启动时该函数被调用。
+
+```Go
+func (r *CronJobReconciler) SetupWithManager(mgr ctrl.Manager) error {
+    return ctrl.NewControllerManagedBy(mgr).
+        For(&batchv1.CronJob{}).
+        Complete(r)
+}
+```
