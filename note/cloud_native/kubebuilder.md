@@ -56,10 +56,6 @@ Kubebuilder 的核心组件，用于：
 
 K8s GC 在删除一个对象时，任何 ownerReference 是该对象的对象都会被清除，与此同时，Kubebuidler 支持所有对象的变更都会触发 Owner 对象 controller 的 Reconcile 方法。
 
-## 流程
-
-![](kubebuilder.png)
-
 ## 创建 API
 
 通过 `kubebuilder create api` 命令可以创建一个新的 Kind。
