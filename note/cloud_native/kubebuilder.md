@@ -44,14 +44,6 @@ Kubebuilder 的核心组件，用于：
 - 初始化共享 caches，包含 listAndWatch 功能;
 - 初始化 clients 用于与 Api Server 通信。
 
-### Index
-
-由于 Controller 经常要对 Cache 进行查询，Kubebuilder 提供 Index utility 给 Cache 加索引提升查询效率。
-
-### Finalizer
-
-用于告诉 kubernetes GC 删除某个对象。
-
 ### OwnerReference
 
 K8s GC 在删除一个对象时，任何 ownerReference 是该对象的对象都会被清除，与此同时，Kubebuidler 支持所有对象的变更都会触发 Owner 对象 controller 的 Reconcile 方法。
