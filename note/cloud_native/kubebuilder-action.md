@@ -62,15 +62,6 @@ type Guestbook struct {
 	Spec   GuestbookSpec   `json:"spec,omitempty"`
 	Status GuestbookStatus `json:"status,omitempty"`
 }
-
-// +kubebuilder:object:root=true
-
-// GuestbookList contains a list of Guestbook
-type GuestbookList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Guestbook `json:"items"`
-}
 ```
 
 最后，将 CRD 注册到 scheme 中：
@@ -87,7 +78,7 @@ func init() {
 make install
 ```
 
-使用 describe 命令查看 CRD：
+使用 get 命令查看 CRD：
 
 ```bash
 sheep@sheep:~/workspace/milvus/sheep/kube-example$ kubectl get CustomResourceDefinition
