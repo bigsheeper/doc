@@ -6,7 +6,7 @@
 
 Kubernetes 是一个可移植的、可扩展的开源平台，用于管理容器化的工作负载和服务，可促进声明式配置和自动化。Kubernetes 拥有一个庞大且快速增长的生态系统。Kubernetes 的服务、支持和工具广泛可用。
 
-![](deployment_ears.png)
+![](images/deployment_ears.png)
 
 容器部署时代：共享操作系统，因此是轻量级的。容器具有自己的文件系统、CPU、内存、进程空间等等。
 
@@ -49,7 +49,7 @@ kubernetes 的特性：
 nodes 作为 Pods 的宿主机， control plane 管理集群中的 pods 和 nodes。
 在生产环境中，control plane 一般存在于多台机器上，这样是为了保证其故障转移和高可用的特性。
 
-![](kubernetes_components.png)
+![](images/kubernetes_components.png)
 
 ### Control Plane 组件
 
@@ -258,3 +258,334 @@ deployment.apps/nginx-deployment created
 - spec
 
 ### kubernetes 对象管理
+
+#### 1. 命令式指令
+
+`kubectl create deployment nginx --image nginx`
+
+#### 2. 命令式对象配置
+
+```bash
+kubectl create -f nginx.yaml
+kubectl delete -f nginx.yaml -f redis.yaml
+kubectl replace -f nginx.yaml
+```
+
+#### 3. 声明式对象配置
+
+处理 configs 目录中的所有 yaml 文件，创建并更新对象。可以先使用 diff 命令查看将要进行的更改：
+
+```bash
+kubectl diff -f configs/
+kubectl apply -f configs/
+```
+
+递归处理 configs 目录：
+
+```bash
+kubectl diff -R -f configs/
+kubectl apply -R -f configs/
+```
+
+### name & IDs
+
+name 用于区分同一种资源的不同对象，UID 用于区分集群中的不同对象。
+
+也就是说集群中可以同时存在 name 为 `myapp-1234` 的一个 pod 和一个 deployment。
+
+#### Names
+
+一个由客户端提供的 string，用来指向一个在资源 URL 中的对象。例如：`/api/v1/pods/some-name`。
+
+以下是一个名为 nginx-demo 的 pod示例：
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-demo
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+```
+
+#### IDs
+
+由 kubernetes 系统自动生成的用于区分对象的字符串。
+
+使用命令查看 nginx-demo 的 uid：
+
+```bash
+kubectl get pods nginx-demo -o yaml | grep uid
+```
+
+输出：
+
+```bash
+uid: 9f1287bb-b75f-4901-a2f8-aaf810e108e4
+```
+
+#### Namespaces
+
+用于在同一个物理集群上支持多个虚拟集群。
+
+列出当前集群的 namespaces：
+
+```bash
+kubectl get namespace
+```
+
+输出：
+
+```bash
+NAME              STATUS   AGE
+default           Active   6d18h
+kube-node-lease   Active   6d18h
+kube-public       Active   6d18h
+kube-system       Active   6d18h
+```
+
+以上为 kubernetes 初始化的 namespaces：
+
+- default，没有指定 namespace 的对象的缺省所属。
+- kube-system，由 kubernetes 系统创建的对象所属。
+- kube-public，所有用户都可以访问和使用。
+- kube-node-lease，与每个 node 都有关联的租赁对象所属。
+
+##### 设置请求的 namespace
+
+```bash
+kubectl run nginx --image=nginx --namespace=<insert-namespace-name-here>
+kubectl get pods --namespace=<insert-namespace-name-here>
+```
+
+##### 设置当前的 namespace
+
+使用如下命令设置 namespace，这意味着之后不需要再添加 `--namespace` 参数：
+
+```bash
+kubectl config set-context --current --namespace=<insert-namespace-name-here>
+# Validate it
+kubectl config view --minify | grep namespace:
+```
+
+##### namespaces 与 DNS
+
+当创建了一个 Service 时，相应的会产生一个 DNS entry。该 entry 的形式为 `<service-name>.<namespace-name>.svc.cluster.local`。这意味着如果容器只使用 `<service-name>`，那么它将被解析到本地 namespace 的 service 中。
+
+##### 并非所有对象都在同一个 namespace
+
+大多数对象（pods,services 等）都在同一个 namespace，然而对于一些较为底层的对象（nodes，persistentVolumes 等），它们所处的 namespace 不同。
+
+使用如下命令查看哪些资源是在同一个或不同的 namesapce：
+
+```bash
+# In a namespace
+kubectl api-resources --namespaced=true
+
+# Not in a namespace
+kubectl api-resources --namespaced=false
+```
+
+#### Labels & Selectors
+
+Labels 是对象中 k-v 形式的键值对，用于指定对用户而言有意义的标识属性。可以在创建时指定，也可以在创建后随时更改或添加。
+
+##### Label selectors
+
+用于对象分组。可使用`，`（意为`&&`）进行多次 selector。selector 主要有两种 selector：
+
+###### 1. Equality-based requirement
+
+`=，==，！=`
+
+例如：
+
+```bash
+environment = production
+tier != frontend
+```
+
+值得注意的是，`！=`除了选取所有带有 tier key，value 不等于 frontend 的资源之外，还会选取没有 tier key 的资源。
+
+一个使用实例就是 pod 指定 node。例如：
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cuda-test
+spec:
+  containers:
+    - name: cuda-test
+      image: "k8s.gcr.io/cuda-vector-add:v0.1"
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+  nodeSelector:
+    accelerator: nvidia-tesla-p100
+```
+
+###### 2. Set-based requirement
+
+`in`, `notin`, `exists`（仅用于对 key 进行表标识）
+
+例如：
+
+```bash
+environment in (production, qa)
+tier notin (frontend, backend)
+partition # 带有 partition key 的资源，没有 value 检查
+!partition # 不带有 partition key 的资源，没有 value 检查
+```
+
+##### API LIST and WATCH filtering
+
+例如：
+
+基于 equality-based：
+
+```bash
+kubectl get pods -l environment=production,tier=frontend
+```
+
+基于 set-based：
+
+```bash
+kubectl get pods -l 'environment in (production),tier in (frontend)'
+```
+
+###### 1. Service and ReplicationController
+
+仅支持 equality-based selector，例如：
+
+```yaml
+selector:
+    component: redis
+```
+
+###### 2. 支持 set-based 的资源
+
+例如 Job、Deployment、ReplicaSet、DaemonSet 等。
+
+```yaml
+selector:
+  matchLabels:
+    component: redis
+  matchExpressions:
+    - {key: tier, operator: In, values: [cache]}
+    - {key: environment, operator: NotIn, values: [dev]}
+```
+
+#### Annotations
+
+为对象添加的附属信息 metadata，不用于唯一标识。与 label 相比，格式要求不严格，可大可小，可以是结构化的，也可以是非结构化的。
+
+使用场景举例：
+
+- 由声明性配置所管理的字段。将这些字段附加为注解，能够将客户端与服务端设置的字段区分开来。
+- 构建、发布或镜像信息（如时间戳、发布 ID、Git 分支、PR 数量、镜像哈希、仓库地址等）。
+- 指向日志记录、监控。
+- 可用于调试目的的客户端库或工具信息：例如，名称、版本和构建信息。
+- 用户或者工具的来源信息，例如来自其他生态系统组件的相关对象的 URL。
+- 推出的轻量级工具的元数据信息：例如，配置或检查点。
+- 负责人员的电话或呼机号码，或指定在何处可以找到该信息的目录条目，如团队网站。
+
+annotations 也是 k-v 键值对的形式，例如：
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: annotations-demo
+  annotations:
+    imageregistry: "https://hub.docker.com/"
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+```
+
+#### Field Selectors
+
+用于通过一个或多个字段选取资源。
+
+例如：
+
+```bash
+kubectl get pods --field-selector status.phase=Running
+```
+
+所有的资源类型都支持对字段 `metadata.namespace` 和 `metadata.name` 的选取。
+
+Field Selector 同样支持操作符：`=，==，！=`。例如：
+
+```bash
+kubectl get services  --all-namespaces --field-selector metadata.namespace!=default
+```
+
+链式 selector，例如，筛选 status.phase 字段不等于 Running 同时 spec.restartPolicy 字段等于 Always 的所有 Pod：
+
+```bash
+kubectl get pods --field-selector=status.phase!=Running,spec.restartPolicy=Always
+```
+
+多种资源类型的选取，例如，筛选出所有不在 default 命名空间中的 StatefulSet 和 Service：
+
+```bash
+kubectl get statefulsets,services --all-namespaces --field-selector metadata.namespace!=default
+```
+
+#### Recommended Labels
+
+使用这些标签，可以使得应用管理更加简单便捷。
+
+![](images/recommended_labels.png)
+
+例如：
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/name: mysql
+    app.kubernetes.io/instance: mysql-abcxzy
+    app.kubernetes.io/version: "5.7.21"
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: wordpress
+    app.kubernetes.io/managed-by: helm
+```
+
+##### 一个简单的无状态 Service 示例
+
+deployment 用于监督应用的 pods：
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: myservice
+    app.kubernetes.io/instance: myservice-abcxzy
+...
+```
+
+service 用于暴露该应用：
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: myservice
+    app.kubernetes.io/instance: myservice-abcxzy
+...
+```
+
+<https://kubernetes.io/docs/concepts/overview/working-with-objects/>

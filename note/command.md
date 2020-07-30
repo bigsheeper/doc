@@ -196,6 +196,9 @@ produce massage from file
 
 ### minikube
 
+start minikube
+`minikube start --image-repository=registry.cn-hangzhou.aliyuncs.com/google_containers`
+
 start service
 `minikube service $service-name`
 
