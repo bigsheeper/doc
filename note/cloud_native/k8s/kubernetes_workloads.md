@@ -741,9 +741,9 @@ sheep@sheep:~$ kubectl get rs -w
 
 #### Deployment status
 
-- Progressing Deployment：创建 ReplicaSet、扩展新的 ReplicaSet、关闭旧的 ReplicaSet、新的 pod 可用。
+- **Progressing Deployment**：创建 ReplicaSet、扩展新的 ReplicaSet、关闭旧的 ReplicaSet、新的 pod 可用。
 
-- complete Deployment：更新已经达到期望状态、所有副本可用、没有旧的副本正在运行。
+- **complete Deployment**：更新已经达到期望状态、所有副本可用、没有旧的副本正在运行。
 
 使用以下命令查看 Deployment 是否处于 complete 状态：
 
@@ -752,3 +752,47 @@ sheep@sheep:~$ kubectl rollout status deployment.v1.apps/nginx-deployment && ech
 deployment "nginx-deployment" successfully rolled out
 0 # 返回 0 表明已经完成
 ```
+
+- **Failed Deployment**：Insufficient quota（配额不足）、Readiness probe failures、Image pull errors、Insufficient permissions、Limit ranges、Application runtime misconfiguration。
+
+可以在 `.spec.progressDeadlineSeconds` 中为 processing 设置 deadline：
+
+```bash
+sheep@sheep:~$ kubectl patch deployment.v1.apps/nginx-deployment -p '{"spec":{"progressDeadlineSeconds":60}}'
+deployment.apps/nginx-deployment patched
+```
+
+一旦 deadline 超过了，那么 Delpoyment controller 就会给 Deployment 的 `.status.conditions` 添加 DeploymentCondition：
+
+- Type=Progressing
+- Status=False
+- Reason=ProgressDeadlineExceeded
+
+这种情况下，使用 describe 则会看到：
+
+```bash
+Conditions:
+  Type            Status  Reason
+  ----            ------  ------
+  Available       True    MinimumReplicasAvailable
+  Progressing     False   ProgressDeadlineExceeded
+  ReplicaFailure  True    FailedCreate
+```
+
+一旦增加配额或满足配额条件时，controller 就会更新 condition：
+
+```bash
+Conditions:
+  Type          Status  Reason
+  ----          ------  ------
+  Available     True    MinimumReplicasAvailable
+  Progressing   True    NewReplicaSetAvailable
+```
+
+`Type=Available` 为 `Status=True` 表明 Deployment 已经达到了最小可用要求。
+
+`Type=Progressing` 为 `Status=True` 表明 Deployment 处于 progressing 或 complete 状态。
+
+可以通过 `.spec.revisionHistoryLimit` 设置 revision 数量，默认为 10。
+
+#### Writing a Deployment Spec
