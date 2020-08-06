@@ -796,3 +796,91 @@ Conditions:
 可以通过 `.spec.revisionHistoryLimit` 设置 revision 数量，默认为 10。
 
 #### Writing a Deployment Spec
+
+<https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#writing-a-deployment-spec>
+
+### StatefulSet
+
+StatefulSet is the workload API object used to manage stateful applications.
+
+Manages the deployment and scaling of a set of Pods, and provides guarantees about the ordering and uniqueness of these Pods.
+
+If you want to use storage volumes to provide persistence for your workload, you can use a StatefulSet as part of the solution. Although individual Pods in a StatefulSet are susceptible to failure, the persistent Pod identifiers make it easier to match existing volumes to the new Pods that replace any that have failed.
+
+StatefulSet 能够保证 pods 的有序性和唯一性。如果你的 workload 需要持久化的存储卷，那么就可以使用 StatefulSet。这样可以使得 pod 在失败后也能将现有的卷与新的 pod 相匹配。
+
+#### Using StatefulSets
+
+StatefulSet 可以满足以下几个场景的需求：
+
+- Stable, unique network identifiers.
+- Stable, persistent storage.
+- Ordered, graceful deployment and scaling.
+- Ordered, automated rolling updates.
+
+如果你的应用不需要 stable identifiers 或者有序部署删除扩展，那么推荐使用 Deployment 或 ReplicaSet。
+
+#### Limitations
+
+- Pod 的存储必须先由 `PersistentVolume Provisioner` 提供。
+- 为了数据安全，删除 StatefulSet 并不会删除对应的卷。
+- StatefulSet 需要 Headless Service 为 pods 做网络认证。Service 需要自己创建。
+- 当 StatefulSet 被删除时，不保证 pod 的终止。要实现 StatefulSet 中的 pods 的有序终止，可以将 StatefulSet 扩展为 0。
+- 使用 `orderedReady` 进行滚动更新时，可能会进入一个坏的状态。
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx # has to match .spec.template.metadata.labels
+  serviceName: "nginx"
+  replicas: 3 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: nginx # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: nginx
+        image: k8s.gcr.io/nginx-slim:0.8
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "my-storage-class"
+      resources:
+        requests:
+          storage: 1Gi
+```
+
+以上示例中：
+
+- 一个名为 `nginx` 的 Headless Service，用于控制网络域。
+- Spec 指定了 3 个副本 container。
+- `volumeClaimTemplates` 通过 `PersistentVolumes` 提供了稳定存储。

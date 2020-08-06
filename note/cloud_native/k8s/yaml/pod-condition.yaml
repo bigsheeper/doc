@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello
+spec:
+  template:
+    # This is the pod template
+    spec:
+      containers:
+      - name: hello
+        image: busybox
+        command: ['sh', '-c', 'echo "Hello, Kubernetes!" && sleep 20']
+      restartPolicy: Never 
+    # The pod template ends here
+status:
+  conditions:
+    - type: Ready                              # a built in PodCondition
+      status: "True"
+    - type: "www.example.com/feature-1"        # an extra PodCondition
+      status: "False"
