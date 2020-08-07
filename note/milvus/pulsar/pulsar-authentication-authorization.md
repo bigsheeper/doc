@@ -47,7 +47,7 @@ superUserRoles=admin
 
 ### 配置 Client
 
-配置 clinet，给 `pulsar-admin` 工具赋予超级用户权限，将认证方式指定为 token，并添加创建超级用户时返回的 token：
+在 `conf/client.conf` 中配置 client，给 `pulsar-admin` 工具赋予超级用户权限，将认证方式指定为 token，并添加创建超级用户时返回的 token：
 
 ```conf
 # Authentication plugin to authenticate with servers
