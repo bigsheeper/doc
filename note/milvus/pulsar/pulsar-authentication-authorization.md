@@ -21,7 +21,7 @@ $ bin/pulsar tokens create --secret-key file:///tmp/my-secret.key --subject admi
 
 ## 超级用户配置
 
-### 配置 standalone
+### 配置 Standalone
 
 在 `conf/standalone.conf` 中启用认证与授权，指定认证方式为 token，并配置密钥路径：
 
@@ -45,7 +45,7 @@ tokenSecretKey=file:///tmp/my-secret.key
 superUserRoles=admin
 ```
 
-### 配置 clinet
+### 配置 Client
 
 配置 clinet，给 `pulsar-admin` 工具赋予超级用户权限，将认证方式指定为 token，并添加创建超级用户时返回的 token：
 
