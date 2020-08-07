@@ -142,7 +142,7 @@ def consumer_data(partition):
 consumer_data("persistent://public/default/topic0")
 ```
 
-### 参考链接
+## 参考链接
 
 <https://pulsar.apache.org/docs/en/security-jwt/>
 
