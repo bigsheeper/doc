@@ -2,6 +2,14 @@
 
 Pulsar 的安全性主要由 Authentication（认证）与 Authorization（授权）来保证。默认情况下，Pulsar 不设置任何认证与授权，即任何客户端都可以使用 URL 进行访问。Pulsar 认证与授权都是插件的机制，认证用于控制哪些用户可以访问集群，授权用于控制访问集群的用户可以进行哪些操作，如发布、订阅消息、创建租户等。
 
+## 初始化 Pulsar Standalone
+
+使用如下命令初始化 standalone，该命令会自动创建一个 `persistent://public/default` namespace：
+
+```bash
+$ bin/pulsar standalone
+```
+
 ## 创建密钥
 
 使用如下命令创建密钥，将其保存至 `/tmp/my-secret.key` 文件中：
@@ -65,9 +73,9 @@ authPlugin=org.apache.pulsar.client.impl.auth.AuthenticationToken
 authParams=token:eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiJ9.Sc_YVn5a0-8j-Z-8HVmqlmhIewzlK-y1H0IS5t5OgRs
 ```
 
-## 启动 Pulsar Standalone
+## 重启 Pulsar Standalone
 
-使用如下命令启动 pulsar standalone：
+在原来的 standalone 终端中使用 `ctrl+c` 进行关闭，再使用如下命令启动 pulsar standalone：
 
 ```bash
 $ bin/pulsar standalone -nfw -nss
