@@ -243,6 +243,26 @@ delete deployment
 
 `kubectl delete deployment <deployment-name>`
 
+## Pulsar
+
+list namespaces
+
+`bin/pulsar-admin namespaces list <tenant-name>`
+
+create namespace
+
+`bin/pulsar-admin namespaces create <tenant-name>/<namespace-name>`
+
+delete schema
+
+`pulsar-admin schemas delete <topic-name>`
+
+grant permission to namespace
+
+`pulsar-admin namespaces grant-permission <tenant-name>/<namespace-name> --role <role-name> --actions produce,consume`
+
+<http://pulsar.apache.org/docs/en/pulsar-admin/>
+
 ## Other
 
 use objdump to check function sign

@@ -884,3 +884,60 @@ spec:
 - 一个名为 `nginx` 的 Headless Service，用于控制网络域。
 - Spec 指定了 3 个副本 container。
 - `volumeClaimTemplates` 通过 `PersistentVolumes` 提供了稳定存储。
+
+#### Pod Identity
+
+StatefulSet Pods 有一个统一标识符，该标识符由一个有序、稳定的网络以及稳定的存储组成。标识符与 Pod 相绑定，无论该 pod 被调度到哪个节点。
+
+**Ordinal Index**
+
+假设一个 StatefulSet 拥有 N 个副本，那么就会从 0 ～ N-1 给每个 pod 进行标识。
+
+**Stable Network ID**
+
+Pod 的名字由 `$(statefulset name)-$(ordinal)` 的形式组成，例如 `web-0,web-1,web-2`。
+
+![](images/statefulset_network.png)
+
+**Stable Storage**
+
+kubernetes 会给每一个 volumeClaimTemplates 创建一个 PersistentVolume。当 pod 被调度到节点后，pod 的 volumeMounts 就会挂载相应的 PersistentVolumes。
+
+**Pod Name Label**
+
+当 statefulSet controller 创建一个 Pod 后，会给 pod 加上一个形如 `statefulset.kubernetes.io/pod-name` 的 label，用于 Service 与该 pod 的绑定。
+
+#### Deployment and Scaling Guarantees
+
+- Pod 会按照 {0...N-1} 的顺序被创建。
+- 删除时，Pod 会按照 {N-1...0} 的顺序被销毁。
+- 在做扩展操作前，所有的 pod 都需要达到 Running 和 Ready 状态。
+- 一个 pod 销毁前，它的所有继任者都要被终止。
+
+将 `pod.Spec.TerminationGracePeriodSeconds` 设为 0 是极度不推荐的做法。
+
+**Parallel Pod Management**
+
+`Parallel` pod Management 告知 StatefulSet controller 并行启动和销毁 pod，pod 的部署和终止不在有序进行。该行为仅仅能作用于扩展操作，不能作用于更新操作。
+
+#### Update Strategies
+
+在 `.spec.updateStrategy` 字段中，可以对 containers、lebels、resource request/limits、annotations 的滚动更新进行配置或取消。
+
+**On Delete**
+
+将 `.spec.updateStrategy.type` 字段设为 `OnDelete` 后，statefulset controller 就不会对 pod 进行自动更新了，更新操作需要手动删除 pod 后才会进行。
+
+**Rolling Updates**
+
+`.spec.updateStrategy.type` 字段默认为 `RollingUpdate`，会对 pod 进行自动销毁和更新。
+
+**Partitions**
+
+在 `.spec.updateStrategy.rollingUpdate.partition` 字段中进行设置，大于 partition 的 pod 会被自动更新，小于 partition 的 pod 不会被自动更新。即使小于 partition 的 pod 被删除了，那么它们也会被部署为旧的版本。partition 功能可以用于阶段更新。
+
+**Forced Rollback**
+
+若 statefulset 中的 pod 永远不会达到 running 和 ready 状态（由于二进制错误或配置参数错误等），statefulset 会停止滚动并一直等待。
+
+### DaemonSet
