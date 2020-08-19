@@ -941,3 +941,77 @@ kubernetes 会给每一个 volumeClaimTemplates 创建一个 PersistentVolume。
 若 statefulset 中的 pod 永远不会达到 running 和 ready 状态（由于二进制错误或配置参数错误等），statefulset 会停止滚动并一直等待。
 
 ### DaemonSet
+
+DaemonSet 用于保证所有的 node 都会运行一个相同的 pod，即某个 pod 的拷贝。
+新曾节点时，pod 就会被创建，删除同理。
+
+一些典型的应用场景：
+
+- 每个节点运行一个 storage darmon。
+- 每个节点运行一个 logs collection daemon。
+- 每个节点运行一个 monitoring daemon。
+
+#### Writing a DaemonSet Spec
+
+**Create a DaemonSet**
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-elasticsearch
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd-logging
+spec:
+  selector:
+    matchLabels:
+      name: fluentd-elasticsearch
+  template:
+    metadata:
+      labels:
+        name: fluentd-elasticsearch
+    spec:
+      tolerations:
+      # this toleration is to have the daemonset runnable on master nodes
+      # remove it if your masters can't run pods
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+      - name: fluentd-elasticsearch
+        image: quay.io/fluentd_elasticsearch/fluentd:v2.5.2
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+```
+
+**Required Fields**
+
+apiVersion、kind、metadate、spec
+
+**Pod Template**
+
+在 spec 中需要有 `.spec.template`，template 中的 `RestartPolicy` 必须为 `Always`。
+
+**Pod Selector**
+
+从 kubernetes 1.8 开始，pod selector 就必须与 `.spec.template` 相匹配。
+
+当 DaemonSet 被创建后
