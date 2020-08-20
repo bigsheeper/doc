@@ -1,12 +1,12 @@
-# cgo
+# CGO
+
+## 一、CGO 的使用方式
 
 使用 golang 的内置模块 cgo，能够实现 go 对 c/c++ 接口的调用。主要有三种实现方式：go 代码中内嵌 c/c++ 代码、go 直接引用 c/c++ 文件、go 调用 c/c++ 的动/静态库。
 
 无论是哪种实现方式，都需要在 go 文件中导入 cgo 模块：`import "C"`，并在该导入语句的上方插入注释，该注释可以直接是 c/c++ 的代码，也可以是 gcc 的编译选项。
 
-此外，还会介绍指针作为参数在 go 和 c/c++ 中进行交互，以及在使用 go 和 c/c++ 内存中的一些注意事项。
-
-## go 代码中内嵌 c/c++ 代码
+### go 代码中内嵌 c/c++ 代码
 
 在 go 代码中，直接在上述的注释位置内嵌 c 代码，例如：
 
@@ -31,7 +31,7 @@ func main() {
 
 但是在实际工程应用中，这种方法显然较为麻烦。
 
-## 在 project 中 go 直接引用 c/c++ 文件
+### 在 project 中 go 直接引用 c/c++ 文件
 
 go 中直接引用 c 文件，这种方法结构较为清晰，且可以随时修改查看结果。示例：
 
@@ -79,7 +79,7 @@ func main() {
 }
 ```
 
-## go 调用 c/c++ 的动态库
+### go 调用 c/c++ 的动态库
 
 go 中指定 gcc 编译选项，指定动态库名称、动态库位置、头文件位置等，从而实现对 c/c++ 库的调用。示例：
 
@@ -129,11 +129,17 @@ func main() {
 gcc -shared -fPIC -o libtest.so ../test.c
 ```
 
-## 指针参数
+## 二、CGO 中的指针
 
-可以将指针作为参数传入 c/c++ 接口中进行计算。该指针可以在 go 中进行内存申请（如 make），这种情况下，可以由于 go 的 GC 机制，不要要对内存进行手动管理。此外，指针也可以在 c/c++ 中进行内存申请（如 malloc)，这种情况下就需要手动调用 c 的 free 接口对内存进行释放。
+介绍指针作为参数或返回值在 go 和 c/c++ 中进行交互。
 
-### go 内存指针传入 c/c++
+在 cgo 中，在 go 中分配了内存的指针叫做 go 指针，在 c/c++ 中分配了内存的指针叫做 c/c++ 指针。
+
+指针在 go 中进行内存申请（如 make），这种情况下，由于 go 的 GC 机制，不需要对内存进行手动管理。
+
+指针在 c/c++ 中进行内存申请（如 malloc)，这种情况下就需要手动调用 c 的 free 接口对内存进行释放。
+
+### go 指针
 
 示例项目结构如下：
 
@@ -213,6 +219,116 @@ Hello, 9
 5
 ```
 
-### go 指针传入 c/c++，在 c/c++ 中分配内存
+### c/c++ 指针
 
-TODO
+使用 malloc 函数，在 c/c++ 中分配内存，并在 go 中进行访问，最后，由于该内存不是由 go 进行的管理，所以需要手动对内存进行释放。示例：
+
+示例项目结构如下：
+
+```txt
+cgocptr/
+├── build
+│   └── libtest.so
+├── main.go
+├── test.c
+└── test.h
+```
+
+test.h
+
+```c
+void* c_malloc(int size);
+
+void cptr_test(void* ptr);
+
+void c_free(void* ptr);
+```
+
+test.c
+
+```c
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "test.h"
+
+#define LENGTH 10
+
+void* c_malloc(int size) {
+    void* ptr = malloc(size);
+    return ptr;
+}
+
+void c_free(void* ptr) {
+  if (ptr != NULL) {
+    free(ptr);
+    ptr = NULL;
+  }
+}
+
+void cptr_test(void* ptr) {
+  for (int i = 0; i < LENGTH; i++) {
+    ((double *)ptr)[i] = i;
+  }
+}
+```
+
+main.go
+
+```go
+package main
+
+/*
+#cgo CFLAGS: -I./
+
+#cgo LDFLAGS: -L/home/sheep/go/src/c2go/build -ltest -Wl,-rpath=./build
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "test.h"
+*/
+import "C"
+import "fmt"
+import "unsafe"
+import "reflect"
+
+const length int = 10
+
+func test_c_ptr() {
+        var b unsafe.Pointer = C.c_malloc(C.int(8 * length))
+        C.cptr_test(b)
+
+        fmt.Println("Pointer type: ", reflect.TypeOf(b))
+        if (b == nil) {
+                fmt.Println("nullptr error")
+                return
+        }
+
+        // pointer to array
+        b_arr := *(*[length]float64)(b)
+        fmt.Println("Array type: ", reflect.TypeOf(b_arr))
+        fmt.Println(b_arr)
+
+        C.c_free(b)
+}
+
+func main() {
+        test_c_ptr()
+}
+```
+
+在 cgo 中，c 的 void* 与 go 中的 unsafe.Pointer 相对应。在该示例中，首先调用 c_malloc 函数分配一块内存，并返回对应的指针 b，将指针作为参数传入 cptr_test 函数对内存进行赋值。之后将指针转为数组 b_arr 并打印。最后，调用 c_free 函数释放内存。
+
+该示例程序的运行结果如下：
+
+```bash
+sheep@sheep:~/go/src/cgocptr$ go run main.go
+Pointer type:  unsafe.Pointer
+Array type:  [10]float64
+[0 1 2 3 4 5 6 7 8 9]
+```
+
+## 三、CGO vs C++
+
+在 cgo 中，默认只支持 go 与 c 的交互，因此，若想使用 c++ 的第三方接口或自己编写的 c++ 接口，则需要先使用 c 对 c++ 接口进行封装，再使用 cgo 在 go 中调用。
