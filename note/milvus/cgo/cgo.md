@@ -331,4 +331,139 @@ Array type:  [10]float64
 
 ## 三、CGO vs C++
 
-在 cgo 中，默认只支持 go 与 c 的交互，因此，若想使用 c++ 的第三方接口或自己编写的 c++ 接口，则需要先使用 c 对 c++ 接口进行封装，再使用 cgo 在 go 中调用。
+在 cgo 中，默认只支持 go 与 c 的交互，因此，若想使用 c++ 的第三方接口或自己编写的 c++ 接口，则需要先使用 c 对 c++ 接口进行封装，再使用 cgo 在 go 中调用。示例：
+
+示例项目结构如下：
+
+```txt
+cgoVsCpp/
+├── build
+│   └── libcwrap.so
+├── cwrap.cpp
+├── cwrap.h
+├── main.go
+├── person.cpp
+└── person.h
+```
+
+person.h
+
+```c++
+#pragma once
+
+#include <iostream>
+
+class Person {
+public:
+    explicit Person(int age);
+
+    int age();
+
+private:
+    int age_;
+};
+```
+
+person.cpp
+
+```c++
+#include "person.h"
+
+Person::Person(int age):
+  age_(age){}
+
+int Person::age() {
+  std::cout << "I'm " << age_ << " years old." << std::endl;
+  return age_;
+}
+```
+
+cwrap.h
+
+```c++
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef void* CPerson;
+CPerson PersonInit(int);
+int age(CPerson cp);
+
+#ifdef __cplusplus
+}
+#endif
+```
+
+cwrap.cpp
+
+```c++
+#include "person.h"
+#include "cwrap.h"
+
+CPerson PersonInit(int age) {
+  CPerson cp = new Person(age);
+  return (void*)cp;
+}
+
+int age(CPerson cp) {
+  auto p = (Person*)cp;
+  return p->age();
+}
+```
+
+main.go
+
+```go
+package main
+
+/*
+
+#cgo CFLAGS: -I./
+
+#cgo LDFLAGS: -L./build -lcwrap -Wl,-rpath=./build
+
+#include "cwrap.h"
+
+*/
+import "C"
+import "fmt"
+
+func test_person() {
+        var person = C.PersonInit(5);
+        var age = C.age(person)
+        fmt.Println(age)
+}
+
+func main() {
+        fmt.Println("Test person:")
+        test_person()
+}
+```
+
+在上述示例中，首先在 person.h 中定义了一个 Person 类，并在 person.cpp 中实现其成员函数。然后通过 cwrap.h/cwrap.cpp 文件，通过 C 对 Person 进行封装。
+
+使用如下命令生存动态库 libcwrap.so，则可在 go 文件中对 cwrap 中定义的接口进行调用：
+
+```bash
+g++ -shared -fPIC -o libcwrap.so ../person.cpp ../cwrap.cpp
+```
+
+## 四、相关资料参考
+
+以上示例代码均可见于 <https://github.com/bigsheeper/sheep_go/tree/master/cgo>
+
+### 参考链接
+
+<https://golang.org/cmd/cgo/>
+
+<https://blog.golang.org/cgo>
+
+<https://stackoverflow.com/questions/1713214/how-to-use-c-in-go/1721230>
+
+<https://github.com/golang/go/tree/master/src/cmd/cgo>
+
+<https://www.marlin.pro/blog/cgo-referencing-c-library-in-go/>
+
+<https://eli.thegreenplace.net/2019/passing-callbacks-and-pointers-to-cgo/>
+
+<https://chai2010.gitbooks.io/advanced-go-programming-book/content/ch2-cgo/ch2-05-internal.html>
