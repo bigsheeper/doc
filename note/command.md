@@ -147,6 +147,18 @@ git checkout -b branch-0.3-x_to_push
 git cherry-pick commit-id-from-old-branch
 ```
 
+check origin/remote
+
+```bash
+git remote -v
+```
+
+set origin
+
+```bash
+git remote set-url origin https://github.com/USERNAME/REPOSITORY.git
+```
+
 ## Gdal
 
 convert shp to tiff: -- [参考链接](https://gdal.org/programs/gdal_rasterize.html)
