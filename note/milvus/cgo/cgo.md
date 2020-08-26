@@ -448,7 +448,24 @@ func main() {
 g++ -shared -fPIC -o libcwrap.so ../person.cpp ../cwrap.cpp
 ```
 
-## 四、相关资料参考
+## 四、链接静态库
+
+当 c/c++ 的目标库是静态库时，则需要先使用如下命令编译 go：
+
+```bash
+go build -ldflags="-extldflags=-static"
+```
+
+之后，再运行生成的二进制文件：
+
+```bash
+sheep@sheep:~/go/src/sheep_go/cgo/cgoVsCpp$ ./cgoVsCpp 
+Test person:
+I'm 5 years old.
+5
+```
+
+## 五、相关资料参考
 
 以上示例代码均可见于 <https://github.com/bigsheeper/sheep_go/tree/master/cgo>
 
@@ -467,3 +484,5 @@ g++ -shared -fPIC -o libcwrap.so ../person.cpp ../cwrap.cpp
 <https://eli.thegreenplace.net/2019/passing-callbacks-and-pointers-to-cgo/>
 
 <https://chai2010.gitbooks.io/advanced-go-programming-book/content/ch2-cgo/ch2-05-internal.html>
+
+<https://www.arp242.net/static-go.html>
