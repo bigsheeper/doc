@@ -18,7 +18,7 @@ reader/
 ├── index.go # 索引封装，还未开始对接
 ├── partition.go # Partition 对象
 ├── query_node.go # Query Node 对象及主要逻辑和接口
-├── reader.go # 写节点入口
+├── reader.go # 读节点入口
 ├── result.go # Query 结果返回
 ├── segment.go # Segment 对象
 └── segment_test.go # Segment 接口测试（进行中）
