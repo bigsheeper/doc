@@ -159,6 +159,17 @@ set origin
 git remote set-url origin https://github.com/USERNAME/REPOSITORY.git
 ```
 
+merge branches
+
+```bash
+git checkout main
+
+git checkout -b <pr_branch>
+
+git merge <feature> --squash
+git commit -am "feature message"
+```
+
 ## Gdal
 
 convert shp to tiff: -- [参考链接](https://gdal.org/programs/gdal_rasterize.html)
