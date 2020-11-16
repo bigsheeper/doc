@@ -410,7 +410,161 @@ Color bool `json:"color,omitempty"`
 
 实参通过值的方式传递，因此函数的形参是实参的拷贝。对形参进行修改不会影响实参。但是，如果实参包括引用类型，如指针，slice(切片)、map、function、channel等类型，实参可能会由于函数的间接引用被修改。
 
+### 5.6. 匿名函数
 
+拥有函数名的函数只能在包级语法块中被声明，通过函数字面量（function literal），我们可绕过这一限制，在任何表达式中表示一个函数值。函数字面量的语法和函数声明相似，区别在于func关键字后没有函数名。函数值字面量是一种表达式，它的值被称为匿名函数（anonymous function）。
+
+函数字面量允许我们在使用函数时，再定义它。通过这种技巧，我们可以改写之前对strings.Map的调用：
+
+```go
+strings.Map(func(r rune) rune { return r + 1 }, "HAL-9000")
+```
+
+更为重要的是，通过这种方式定义的函数可以访问完整的词法环境（lexical environment），这意味着在函数中定义的内部函数可以引用该函数的变量，如下例所示：
+
+```go
+gopl.io/ch5/squares
+
+// squares返回一个匿名函数。
+// 该匿名函数每次被调用时都会返回下一个数的平方。
+func squares() func() int {
+    var x int
+    return func() int {
+        x++
+        return x * x
+    }
+}
+func main() {
+    f := squares()
+    fmt.Println(f()) // "1"
+    fmt.Println(f()) // "4"
+    fmt.Println(f()) // "9"
+    fmt.Println(f()) // "16"
+}
+```
+
+函数squares返回另一个类型为 func() int 的函数。对squares的一次调用会生成一个局部变量x并返回一个匿名函数。每次调用匿名函数时，该函数都会先使x的值加1，再返回x的平方。第二次调用squares时，会生成第二个x变量，并返回一个新的匿名函数。新匿名函数操作的是第二个x变量。
+
+squares的例子证明，函数值不仅仅是一串代码，还记录了状态。在squares中定义的匿名内部函数可以访问和更新squares中的局部变量，这意味着匿名函数和squares中，存在变量引用。这就是函数值属于引用类型和函数值不可比较的原因。Go使用闭包（closures）技术实现函数值，Go程序员也把函数值叫做闭包。
+
+通过这个例子，我们看到变量的生命周期不由它的作用域决定：squares返回后，变量x仍然隐式的存在于f中。
+
+#### 5.6.1. 警告：捕获迭代变量
+
+本节，将介绍Go词法作用域的一个陷阱。请务必仔细的阅读，弄清楚发生问题的原因。即使是经验丰富的程序员也会在这个问题上犯错误。
+
+考虑这样一个问题：你被要求首先创建一些目录，再将目录删除。在下面的例子中我们用函数值来完成删除操作。下面的示例代码需要引入os包。为了使代码简单，我们忽略了所有的异常处理。
+
+```go
+var rmdirs []func()
+for _, d := range tempDirs() {
+    dir := d // NOTE: necessary!
+    os.MkdirAll(dir, 0755) // creates parent directories too
+    rmdirs = append(rmdirs, func() {
+        os.RemoveAll(dir)
+    })
+}
+// ...do some work…
+for _, rmdir := range rmdirs {
+    rmdir() // clean up
+}
+```
+
+你可能会感到困惑，为什么要在循环体中用循环变量d赋值一个新的局部变量，而不是像下面的代码一样直接使用循环变量dir。需要注意，下面的代码是错误的。
+
+```go
+var rmdirs []func()
+for _, dir := range tempDirs() {
+    os.MkdirAll(dir, 0755)
+    rmdirs = append(rmdirs, func() {
+        os.RemoveAll(dir) // NOTE: incorrect!
+    })
+}
+```
+
+问题的原因在于循环变量的作用域。在上面的程序中，for循环语句引入了新的词法块，循环变量dir在这个词法块中被声明。在该循环中生成的所有函数值都共享相同的循环变量。需要注意，函数值中记录的是循环变量的内存地址，而不是循环变量某一时刻的值。以dir为例，后续的迭代会不断更新dir的值，当删除操作执行时，for循环已完成，dir中存储的值等于最后一次迭代的值。这意味着，每次对os.RemoveAll的调用删除的都是相同的目录。
+
+通常，为了解决这个问题，我们会引入一个与循环变量同名的局部变量，作为循环变量的副本。比如下面的变量dir，虽然这看起来很奇怪，但却很有用。
+
+```go
+for _, dir := range tempDirs() {
+    dir := dir // declares inner dir, initialized to outer dir
+    // ...
+}
+```
+
+这个问题不仅存在基于range的循环，在下面的例子中，对循环变量i的使用也存在同样的问题：
+
+```go
+var rmdirs []func()
+dirs := tempDirs()
+for i := 0; i < len(dirs); i++ {
+    os.MkdirAll(dirs[i], 0755) // OK
+    rmdirs = append(rmdirs, func() {
+        os.RemoveAll(dirs[i]) // NOTE: incorrect!
+    })
+}
+```
+
+如果你使用go语句（第八章）或者defer语句（5.8节）会经常遇到此类问题。这不是go或defer本身导致的，而是因为它们都会等待循环结束后，再执行函数值。
+
+### 5.8. Deferred函数
+
+你只需要在调用普通函数或方法前加上关键字defer，就完成了defer所需要的语法。当执行到该条语句时，函数和参数表达式得到计算，但直到包含该defer语句的函数执行完毕时，defer后的函数才会被执行，不论包含defer语句的函数是通过return正常结束，还是由于panic导致的异常结束。你可以在一个函数中执行多条defer语句，它们的执行顺序与声明顺序相反。
+
+## 第六章　方法
+
+### 6.1. 方法声明
+
+附加的参数p，叫做方法的接收器（receiver）
+
+### 6.2. 基于指针对象的方法
+
+1. 不管你的method的receiver是指针类型还是非指针类型，都是可以通过指针/非指针类型进行调用的，编译器会帮你做类型转换。
+
+2. 在声明一个method的receiver该是指针还是非指针类型时，你需要考虑两方面的因素，第一方面是这个对象本身是不是特别大，如果声明为非指针变量时，调用会产生一次拷贝；第二方面是如果你用指针类型作为receiver，那么你一定要注意，这种指针类型指向的始终是一块内存地址，就算你对其进行了拷贝。
+
+### 6.4. 方法值和方法表达式
+
+我们经常选择一个方法，并且在同一个表达式里执行，比如常见的p.Distance()形式，实际上将其分成两步来执行也是可能的。p.Distance叫作“选择器”，选择器会返回一个方法“值”->一个将方法（Point.Distance）绑定到特定接收器变量的函数。这个函数可以不通过指定其接收器即可被调用；即调用时不需要指定接收器（译注：因为已经在前文中指定过了），只要传入函数的参数即可：
+
+```go
+p := Point{1, 2}
+q := Point{4, 6}
+
+distanceFromP := p.Distance        // method value
+fmt.Println(distanceFromP(q))      // "5"
+var origin Point                   // {0, 0}
+fmt.Println(distanceFromP(origin)) // "2.23606797749979", sqrt(5)
+
+scaleP := p.ScaleBy // method value
+scaleP(2)           // p becomes (2, 4)
+scaleP(3)           //      then (6, 12)
+scaleP(10)          //      then (60, 120)
+```
+
+和方法“值”相关的还有方法表达式。当调用一个方法时，与调用一个普通的函数相比，我们必须要用选择器（p.Distance）语法来指定方法的接收器。
+
+当T是一个类型时，方法表达式可能会写作T.f或者(*T).f，会返回一个函数“值”，这种函数会将其第一个参数用作接收器，所以可以用通常（译注：不写选择器）的方式来对其进行调用：
+
+```go
+p := Point{1, 2}
+q := Point{4, 6}
+
+distance := Point.Distance   // method expression
+fmt.Println(distance(p, q))  // "5"
+fmt.Printf("%T\n", distance) // "func(Point, Point) float64"
+
+scale := (*Point).ScaleBy
+scale(&p, 2)
+fmt.Println(p)            // "{2 4}"
+fmt.Printf("%T\n", scale) // "func(*Point, float64)"
+
+// 译注：这个Distance实际上是指定了Point对象为接收器的一个方法func (p Point) Distance()，
+// 但通过Point.Distance得到的函数需要比实际的Distance方法多一个参数，
+// 即其需要用第一个额外参数指定接收器，后面排列Distance方法的参数。
+// 看起来本书中函数和方法的区别是指有没有接收器，而不像其他语言那样是指有没有返回值。
+```
 
 ## 第七章　接口
 
@@ -757,5 +911,7 @@ func Balance() int {
     return balance
 }
 ```
+
+### 9.4. 内存同步
 
 
