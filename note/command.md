@@ -170,6 +170,12 @@ git merge <feature> --squash
 git commit -am "feature message"
 ```
 
+change latest commit message
+
+```bash
+git commit --amend -m "New commit message."
+```
+
 ## Gdal
 
 convert shp to tiff: -- [参考链接](https://gdal.org/programs/gdal_rasterize.html)
