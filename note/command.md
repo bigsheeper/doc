@@ -301,3 +301,7 @@ use objdump to check function sign
 install java 8
 
 `sudo apt-get install openjdk-8-jdk`
+
+check directory size
+
+`du -h --max-depth=1 /path/to/directory`
