@@ -1,4 +1,4 @@
-# CGO
+# CGO TUTORIAL
 
 ## 一、CGO 的使用方式
 
